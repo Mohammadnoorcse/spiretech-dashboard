@@ -3,6 +3,7 @@ import { LuDot } from "react-icons/lu";
 import { FaDesktop, FaAngleDown, FaAngleUp } from "react-icons/fa";
 import { MdOutlineFeaturedVideo } from "react-icons/md";
 import { RiProductHuntLine } from "react-icons/ri";
+import { FaFirstOrderAlt } from "react-icons/fa";
 
 const Sidebar = ({ activeItem, setActiveItem, styleConfig }) => {
   const [openSection, setOpenSection] = useState(null);
@@ -27,7 +28,13 @@ const Sidebar = ({ activeItem, setActiveItem, styleConfig }) => {
       id: 'product',
       title: 'Product',
       icon: <RiProductHuntLine />,
-      subItems: ['List', 'Add New', 'Categories']
+      subItems: ['Add New','List',  'Categories','Brand','Color','Size','discount','Coupon','Review','section']
+    },
+    {
+      id: 'order',
+      title: 'Orders',
+      icon: <FaFirstOrderAlt />,
+      subItems: ['Order List', 'Add New', 'Categories']
     },
     {
       id: 'features',

@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import Topbar from './components/Topbar';
 import Sidebar from './components/Sidebar';
 import DashboardHome from './components/DashboardHome';
+import AddProduct from './components/AddProduct';
+import ProductList from './components/ProductList';
+import ProductPage from './components/ProductPage';
 
 // Example dummy components for different sections
 // const DashboardHome = () => <div>📊 Dashboard Overview</div>;
-const ProductList = () => <div>📦 Product List</div>;
-const AddProduct = () => <div>➕ Add New Product</div>;
+// const ProductList = () => <div>📦 Product List</div>;
+// const AddProduct = () => <div>➕ Add New Product</div>;
 const Categories = () => <div>🏷️ Categories</div>;
 const FeatureList = () => <div>⭐ Feature List</div>;
 const AddFeature = () => <div>➕ Add Feature</div>;
@@ -22,7 +25,7 @@ const Dashboard = () => {
       case 'dashboard':
         return <DashboardHome />;
       case 'List':
-        return <ProductList />;
+        return <ProductPage />;
       case 'Add New':
         return <AddProduct />;
       case 'Categories':

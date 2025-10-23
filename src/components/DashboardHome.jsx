@@ -183,16 +183,7 @@ const DashboardHome = () => {
                     <span>Page layouts look better</span>
 
                 </div>
-                <div className="flex gap-2 items-center border-b border-gray-300 pb-2">
-                    <img src="https://www.shutterstock.com/image-photo/clothes-on-clothing-hanger-260nw-2338282257.jpg" alt="product" className="w-[3rem] h-[3rem] rounded-md" />
-                    <span>Page layouts look better</span>
-
-                </div>
-                <div className="flex gap-2 items-center border-b border-gray-300 pb-2">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDpZZ6h10IU8f9i6a7VtQqT8W8gTXvAyLjyOPNKfrkFy8hpfG_R7akTyrYWU7POY0K080&usqp=CAU" alt="product" className="w-[3rem] h-[3rem] rounded-md" />
-                    <span>Page layouts look better </span>
-
-                </div>
+                
            
 
             </div>
