@@ -128,10 +128,27 @@ const ProductList = ({ products, onEdit }) => {
               </div>
               <div className="mt-3 flex gap-2">
                 <button className="flex-1 px-3 py-2 border rounded" onClick={() => onEdit(p)}>Edit</button>
+                {/* <button className="flex-1 px-3 py-2 border rounded">Delete</button> */}
+                
+              
               </div>
             </div>
           </div>
         ))}
+      </div>
+
+       {/* Pagination */}
+      <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+        <div className="text-gray-600">
+          Showing {total ? start + 1 : 0} - {Math.min(start + perPage, total)} of {total}
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setPage(1)} disabled={page === 1} className="px-3 py-1 border rounded disabled:opacity-50">First</button>
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 border rounded disabled:opacity-50">Prev</button>
+          <div className="px-3 py-1 border rounded">{page} / {pages}</div>
+          <button onClick={() => setPage((p) => Math.min(pages, p + 1))} disabled={page === pages} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+          <button onClick={() => setPage(pages)} disabled={page === pages} className="px-3 py-1 border rounded disabled:opacity-50">Last</button>
+        </div>
       </div>
     </div>
   );

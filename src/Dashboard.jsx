@@ -5,12 +5,19 @@ import DashboardHome from './components/DashboardHome';
 import AddProduct from './components/AddProduct';
 import ProductList from './components/ProductList';
 import ProductPage from './components/ProductPage';
+import Category from './components/Category';
+import Brand from './components/Brand';
+import Color from './components/Color';
+import Size from './components/Size';
+import Discount from './components/Discount';
+import Coupon from './components/Coupon';
+import Section from './components/Section';
 
 // Example dummy components for different sections
 // const DashboardHome = () => <div>📊 Dashboard Overview</div>;
 // const ProductList = () => <div>📦 Product List</div>;
 // const AddProduct = () => <div>➕ Add New Product</div>;
-const Categories = () => <div>🏷️ Categories</div>;
+// const Categories = () => <div>🏷️ Categories</div>;
 const FeatureList = () => <div>⭐ Feature List</div>;
 const AddFeature = () => <div>➕ Add Feature</div>;
 const MobileApp = () => <div>📱 Mobile App</div>;
@@ -29,15 +36,19 @@ const Dashboard = () => {
       case 'Add New':
         return <AddProduct />;
       case 'Categories':
-        return <Categories />;
-      case 'Feature List':
-        return <FeatureList />;
-      case 'Add Feature':
-        return <AddFeature />;
-      case 'Mobile App':
-        return <MobileApp />;
-      case 'Web App':
-        return <WebApp />;
+        return <Category />;
+      case 'Brand':
+        return <Brand />;
+      case 'Color':
+        return <Color />;
+      case 'Size':
+        return <Size />;
+      case 'Discount':
+        return <Discount />;
+      case 'Coupon':
+        return <Coupon />;
+      case 'Section':
+        return <Section />;
       default:
         return <div>🔍 Page Not Found</div>;
     }

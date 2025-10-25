@@ -28,7 +28,7 @@ const Sidebar = ({ activeItem, setActiveItem, styleConfig }) => {
       id: 'product',
       title: 'Product',
       icon: <RiProductHuntLine />,
-      subItems: ['Add New','List',  'Categories','Brand','Color','Size','discount','Coupon','Review','section']
+      subItems: ['Add New','List',  'Categories','Brand','Color','Size','Discount','Coupon','Review','Section']
     },
     {
       id: 'order',
