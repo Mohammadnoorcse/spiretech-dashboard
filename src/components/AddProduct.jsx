@@ -1,10 +1,13 @@
 import React, { useRef, useState } from "react";
 import Editor from "./Editor";
 import { LuSettings2 } from "react-icons/lu";
-import { MdOutlineSettingsSystemDaydream } from "react-icons/md";
-import { MdOutlineLocalShipping } from "react-icons/md";
-import { MdOutlineSettingsInputComposite } from "react-icons/md";
+import {
+  MdOutlineSettingsSystemDaydream,
+  MdOutlineLocalShipping,
+  MdOutlineSettingsInputComposite,
+} from "react-icons/md";
 import Multiselect from "multiselect-react-dropdown";
+import axios from "axios";
 
 // Shared styles for Multiselect
 const multiselectStyle = {
@@ -36,7 +39,6 @@ const sizeOption = [
   { name: "Large", id: 2 },
 ];
 
-// Dropdown options
 const discountOptions = [
   { label: "No Discount", value: "" },
   { label: "5% Off", value: "5" },
@@ -46,9 +48,9 @@ const discountOptions = [
 ];
 
 const statusOptions = [
-  { label: "Draft", value: "draft" },
-  { label: "Published", value: "published" },
-  { label: "Archived", value: "archived" },
+  { label: "Draft", value: "1" },
+  { label: "Published", value: "2" },
+  { label: "Archived", value: "3" },
   { label: "Out of Stock", value: "out_of_stock" },
 ];
 
@@ -64,7 +66,6 @@ const AddProduct = () => {
   const editorRef = useRef(null);
   const [activeTab, setActiveTab] = useState("General");
 
-  // all form data in one state
   const [product, setProduct] = useState({
     name: "",
     shortDesc: "",
@@ -87,7 +88,6 @@ const AddProduct = () => {
 
   const [images, setImages] = useState([]);
 
-  // generic change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct((prev) => ({ ...prev, [name]: value }));
@@ -110,15 +110,69 @@ const AddProduct = () => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const dataToSend = {
-      ...product,
-      description: editorRef.current?.getData?.() || "",
-      images,
-    };
-    console.log("Submitting Product:", dataToSend);
-    // Example: axios.post('/api/products', dataToSend)
+    try {
+      const formData = new FormData();
+
+      // Save Editor data
+      const editorData = await editorRef.current?.save();
+      formData.append("description", JSON.stringify(editorData || {}));
+
+      // Append all other fields, JSON encode arrays for Laravel
+      formData.append("name", product.name);
+      formData.append("short_desc", product.shortDesc);
+      formData.append("regular_price", product.regularPrice);
+      formData.append("sale_price", product.salePrice);
+      formData.append("sku", product.sku);
+      formData.append("stock", product.stock);
+      formData.append("status", product.status);
+      formData.append("currency", product.currency);
+      formData.append("discount_id", product.discount);
+
+      formData.append("tax_status_id", JSON.stringify(product.taxStatus));
+      formData.append("shipping_id", JSON.stringify(product.shipping));
+      formData.append("color_id", JSON.stringify(product.color));
+      formData.append("size_id", JSON.stringify(product.size));
+      formData.append("categories_id", JSON.stringify(product.categories));
+      formData.append("brands_id", JSON.stringify(product.brands));
+      formData.append("section_id", JSON.stringify(product.section));
+
+      // Append images
+      images.forEach((img) => formData.append("images[]", img.file));
+
+      const res = await axios.post("http://127.0.0.1:8000/api/products", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      alert("✅ Product created successfully!");
+      console.log("Created:", res.data);
+
+      // Reset
+      setProduct({
+        name: "",
+        shortDesc: "",
+        description: "",
+        regularPrice: "",
+        salePrice: "",
+        taxStatus: [],
+        sku: "",
+        stock: "",
+        shipping: [],
+        color: [],
+        size: [],
+        categories: [],
+        brands: [],
+        section: [],
+        discount: "",
+        status: "",
+        currency: "",
+      });
+      setImages([]);
+    } catch (error) {
+      console.error("❌ Error:", error);
+      alert("Failed to create product!");
+    }
   };
 
   const tabs = [
@@ -273,33 +327,12 @@ const AddProduct = () => {
             onChange={(list) => handleMultiSelect("section", list)}
           />
 
-          {/* Individual Dropdowns */}
-          <Select
-            label="Discount"
-            name="discount"
-            value={product.discount}
-            onChange={handleChange}
-            options={discountOptions}
-          />
-          <Select
-            label="Status"
-            name="status"
-            value={product.status}
-            onChange={handleChange}
-            options={statusOptions}
-          />
-          <Select
-            label="Currency"
-            name="currency"
-            value={product.currency}
-            onChange={handleChange}
-            options={currencyOptions}
-          />
+          {/* Dropdowns */}
+          <Select label="Discount" name="discount" value={product.discount} onChange={handleChange} options={discountOptions} />
+          <Select label="Status" name="status" value={product.status} onChange={handleChange} options={statusOptions} />
+          <Select label="Currency" name="currency" value={product.currency} onChange={handleChange} options={currencyOptions} />
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
-          >
+          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
             Submit
           </button>
         </div>
@@ -308,7 +341,7 @@ const AddProduct = () => {
   );
 };
 
-/* Reusable components */
+/* Reusable Components */
 const Input = ({ label, name, value, onChange, required }) => (
   <div className="flex flex-col gap-1">
     <h3 className="text-sm">

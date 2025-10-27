@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../api/axios";
+import axios from "axios";
 
-// Section Modal (for create and edit)
-const SectionModal = ({
-  title,
-  initialData = { name: "" },
-  onClose,
-  onSave,
-}) => {
+const API_URL = "http://127.0.0.1:8000/api/sections";
+
+// Section Modal
+const SectionModal = ({ title, initialData = { name: "" }, onClose, onSave }) => {
   const [formData, setFormData] = useState(initialData);
 
   return (
@@ -19,9 +18,7 @@ const SectionModal = ({
             type="text"
             placeholder="Section Name"
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="border p-2 rounded w-full"
           />
         </div>
@@ -45,20 +42,42 @@ const SectionModal = ({
   );
 };
 
-// Main Section Page
+// Main Section Component
 const Section = () => {
-  const [sections, setSections] = useState([
-    { id: 1, name: "Home Banner" },
-    { id: 2, name: "Featured Products" },
-  ]);
-
+  const [sections, setSections] = useState([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
 
+  // Fetch all sections
+  useEffect(() => {
+    api.get('api/sections').then((res) => setSections(res.data));
+  }, []);
+
+  // Create new section
+  const handleCreate = async (data) => {
+    const res = await api.post('api/sections', data);
+    setSections([...sections, res.data.data]);
+    setCreateModalOpen(false);
+  };
+
+  // Update section
+  const handleUpdate = async (data) => {
+    const res = await api.put(`api/sections/${currentSection.id}`, data);
+    setSections(
+      sections.map((s) => (s.id === currentSection.id ? res.data.data : s))
+    );
+    setEditModalOpen(false);
+  };
+
+  // Delete section
+  const handleDelete = async (id) => {
+    await api.delete(`api/sections/${id}`);
+    setSections(sections.filter((s) => s.id !== id));
+  };
+
   return (
     <div className="w-full flex flex-col gap-4 p-2">
-      {/* Header */}
       <div className="w-full flex items-center justify-between">
         <h1 className="text-base font-bold">Sections</h1>
         <button
@@ -69,13 +88,13 @@ const Section = () => {
         </button>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto mt-4">
         <table className="min-w-full border text-center text-sm">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border">ID</th>
               <th className="p-2 border">Section Name</th>
+              <th className="p-2 border">Status</th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -84,6 +103,9 @@ const Section = () => {
               <tr key={section.id} className="hover:bg-gray-50">
                 <td className="p-2 border">{section.id}</td>
                 <td className="p-2 border">{section.name}</td>
+                <td className="p-2 border">
+                  {section.status === 1 ? "Active" : "Inactive"}
+                </td>
                 <td className="p-2 border flex justify-center gap-2">
                   <button
                     className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500"
@@ -96,9 +118,7 @@ const Section = () => {
                   </button>
                   <button
                     className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    onClick={() =>
-                      setSections(sections.filter((s) => s.id !== section.id))
-                    }
+                    onClick={() => handleDelete(section.id)}
                   >
                     Delete
                   </button>
@@ -109,32 +129,20 @@ const Section = () => {
         </table>
       </div>
 
-      {/* Create Modal */}
       {createModalOpen && (
         <SectionModal
           title="Create Section"
           onClose={() => setCreateModalOpen(false)}
-          onSave={(data) => {
-            setSections([...sections, { id: sections.length + 1, ...data }]);
-            setCreateModalOpen(false);
-          }}
+          onSave={handleCreate}
         />
       )}
 
-      {/* Edit Modal */}
       {editModalOpen && currentSection && (
         <SectionModal
           title="Edit Section"
           initialData={currentSection}
           onClose={() => setEditModalOpen(false)}
-          onSave={(data) => {
-            setSections(
-              sections.map((s) =>
-                s.id === currentSection.id ? { ...s, ...data } : s
-              )
-            );
-            setEditModalOpen(false);
-          }}
+          onSave={handleUpdate}
         />
       )}
     </div>

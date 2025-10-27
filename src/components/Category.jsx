@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-// Modal Component
-const Modal = ({ title, initialData = { name: "", status: "Active", image: "" }, onClose, onSave }) => {
+import api from "../api/axios";
+
+// ======================= Modal Component =======================
+const Modal = ({
+  title,
+  initialData = { name: "", status: "Active", image: "" },
+  onClose,
+  onSave,
+}) => {
   const [formData, setFormData] = useState(initialData);
+  const [preview, setPreview] = useState(`${import.meta.env.VITE_API_BASE_URL}${initialData.image}` || "");
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Convert to base64 for preview
+      setFormData({ ...formData, image: file });
+
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result });
-      };
+      reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -31,23 +38,40 @@ const Modal = ({ title, initialData = { name: "", status: "Active", image: "" },
           />
           <select
             value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, status: e.target.value })
+            }
             className="border p-2 rounded w-full"
           >
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
           </select>
-          <input type="file" onChange={handleImageChange} className="border p-2 rounded w-full" />
-          {formData.image && (
-            <img src={formData.image} alt="Preview" className="w-24 h-24 object-cover rounded mt-2" />
+
+          <input
+            type="file"
+            onChange={handleImageChange}
+            className="border p-2 rounded w-full"
+          />
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-24 h-24 object-cover rounded mt-2"
+            />
           )}
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <button className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" onClick={onClose}>
+          <button
+            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            onClick={onClose}
+          >
             Cancel
           </button>
-          <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={() => onSave(formData)}>
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={() => onSave(formData)}
+          >
             Save
           </button>
         </div>
@@ -56,24 +80,91 @@ const Modal = ({ title, initialData = { name: "", status: "Active", image: "" },
   );
 };
 
-// Main Category Component
+// ======================= Main Category Component =======================
 const Category = () => {
 
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Electronics", status: "Active", image: "" },
-    { id: 2, name: "Fashion", status: "Inactive", image: "" },
-  ]);
-
+  const [categories, setCategories] = useState([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
+
+  
+
+  //  Load categories
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get("api/category");
+      setCategories(res.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  // Create category
+  const handleCreate = async (data) => {
+    try {
+        const formData = new FormData();
+        formData.append("name", data.name);
+        formData.append("status", data.status === "Active" ? 1 : 0);
+        if (data.image) formData.append("image", data.image);
+
+        await api.post("api/category", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        setCreateModalOpen(false);
+        fetchCategories();
+        } catch (error) {
+        console.error("Error creating category:", error);
+    }
+  };
+
+  // Update category
+  const handleUpdate = async (data) => {
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("status", data.status === "Active" ? 1 : 0);
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
+      await api.post(`api/category/${currentCategory.id}?_method=PUT`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setEditModalOpen(false);
+      fetchCategories();
+    } catch (error) {
+      console.error("Error updating category:", error);
+    }
+  };
+
+  // Delete category
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      try {
+        await api.delete(`api/category/${id}`);
+        fetchCategories();
+      } catch (error) {
+        console.error("Error deleting category:", error);
+      }
+    }
+  };
 
   return (
     <div className="w-full flex flex-col gap-4 p-2">
       {/* Header */}
       <div className="w-full flex items-center justify-between">
         <h1 className="text-base font-bold">Category</h1>
-        <button className="px-4 py-1 bg-[#45AEF1] text-white rounded-md hover:bg-[#3791d5]" onClick={() => setCreateModalOpen(true)}>
+        <button
+          className="px-4 py-1 bg-[#45AEF1] text-white rounded-md hover:bg-[#3791d5]"
+          onClick={() => setCreateModalOpen(true)}
+        >
           Create
         </button>
       </div>
@@ -96,18 +187,27 @@ const Category = () => {
                 <td className="p-2 border border-gray-300">{cat.id}</td>
                 <td className="p-2 border border-gray-300">
                   {cat.image ? (
-                    <img src={cat.image} alt={cat.name} className="w-12 h-12 object-cover rounded mx-auto" />
+                    <img
+                      src={`${import.meta.env.VITE_API_BASE_URL}${cat.image}`}
+                      alt={cat.name}
+                      className="w-12 h-12 object-cover rounded mx-auto"
+                    />
                   ) : (
                     "No Image"
                   )}
                 </td>
                 <td className="p-2 border border-gray-300">{cat.name}</td>
-                <td className="p-2 border border-gray-300">{cat.status}</td>
+                <td className="p-2 border border-gray-300">
+                  {cat.status === 1 ? "Active" : "Inactive"}
+                </td>
                 <td className="p-2 border border-gray-300 flex justify-center gap-2">
                   <button
                     className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500"
                     onClick={() => {
-                      setCurrentCategory(cat);
+                      setCurrentCategory({
+                        ...cat,
+                        status: cat.status === 1 ? "Active" : "Inactive",
+                      });
                       setEditModalOpen(true);
                     }}
                   >
@@ -115,7 +215,7 @@ const Category = () => {
                   </button>
                   <button
                     className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    onClick={() => setCategories(categories.filter((c) => c.id !== cat.id))}
+                    onClick={() => handleDelete(cat.id)}
                   >
                     Delete
                   </button>
@@ -131,10 +231,7 @@ const Category = () => {
         <Modal
           title="Create Category"
           onClose={() => setCreateModalOpen(false)}
-          onSave={(data) => {
-            setCategories([...categories, { id: categories.length + 1, ...data }]);
-            setCreateModalOpen(false);
-          }}
+          onSave={handleCreate}
         />
       )}
 
@@ -144,10 +241,7 @@ const Category = () => {
           title="Edit Category"
           initialData={currentCategory}
           onClose={() => setEditModalOpen(false)}
-          onSave={(data) => {
-            setCategories(categories.map((c) => (c.id === currentCategory.id ? { ...c, ...data } : c)));
-            setEditModalOpen(false);
-          }}
+          onSave={handleUpdate}
         />
       )}
     </div>

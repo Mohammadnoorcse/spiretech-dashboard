@@ -12,6 +12,9 @@ import Size from './components/Size';
 import Discount from './components/Discount';
 import Coupon from './components/Coupon';
 import Section from './components/Section';
+import OrderList from './components/OrderList';
+import Feature from './components/Feature';
+import Shipping from './components/Shipping';
 
 // Example dummy components for different sections
 // const DashboardHome = () => <div>📊 Dashboard Overview</div>;
@@ -47,8 +50,15 @@ const Dashboard = () => {
         return <Discount />;
       case 'Coupon':
         return <Coupon />;
+      case 'Shipping':
+        return <Shipping />;
       case 'Section':
         return <Section />;
+      case 'Order List':
+        return <OrderList />;
+      case 'Feature List':
+        return <Feature />;
+      
       default:
         return <div>🔍 Page Not Found</div>;
     }

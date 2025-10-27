@@ -1,18 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../api/axios"; 
 
-// Coupon Modal
-const CouponModal = ({
-  title,
-  initialData = {
-    name: "",
-    price: "",
-    type: "percentage",
-    startDate: "",
-    endDate: "",
-  },
-  onClose,
-  onSave,
-}) => {
+const CouponModal = ({ title, initialData, onClose, onSave }) => {
   const [formData, setFormData] = useState(initialData);
 
   return (
@@ -25,25 +14,19 @@ const CouponModal = ({
             type="text"
             placeholder="Coupon Name"
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="border p-2 rounded w-full"
           />
           <input
             type="number"
             placeholder="Coupon Value"
             value={formData.price}
-            onChange={(e) =>
-              setFormData({ ...formData, price: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
             className="border p-2 rounded w-full"
           />
           <select
             value={formData.type}
-            onChange={(e) =>
-              setFormData({ ...formData, type: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
             className="border p-2 rounded w-full"
           >
             <option value="percentage">Percentage</option>
@@ -86,44 +69,78 @@ const CouponModal = ({
   );
 };
 
-// Main Coupon Page
 const Coupon = () => {
-  const [coupons, setCoupons] = useState([
-    {
-      id: 1,
-      name: "NEWUSER50",
-      price: 50,
-      type: "percentage",
-      startDate: "2025-10-20",
-      endDate: "2025-10-31",
-    },
-  ]);
+  const [coupons, setCoupons] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
 
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [currentCoupon, setCurrentCoupon] = useState(null);
+  // Fetch all coupons from API
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  const fetchCoupons = async () => {
+    try {
+      const res = await api.get("api/coupons");
+      setCoupons(res.data);
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+    }
+  };
+
+  // Save (Create or Update)
+  const handleSave = async (data) => {
+    try {
+      if (editData) {
+        await api.put(`api/coupons/${editData.id}`, data);
+      } else {
+        await api.post("api/coupons", data);
+      }
+      fetchCoupons();
+      setModalOpen(false);
+      setEditData(null);
+    } catch (error) {
+      console.error("Error saving coupon:", error);
+    }
+  };
+
+  // Delete Coupon
+  const handleDelete = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this coupon?")) return;
+  try {
+    await api.delete(`api/coupons/${id}`); // no need for 'api/' if baseURL is already /api
+    fetchCoupons();
+  } catch (error) {
+    console.error("Error deleting coupon:", error);
+    alert("Failed to delete coupon.");
+  }
+};
+
 
   return (
-    <div className="w-full flex flex-col gap-4 p-2">
+    <div className="p-4 w-full">
       {/* Header */}
-      <div className="w-full flex items-center justify-between">
-        <h1 className="text-base font-bold">Coupons</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-lg font-bold">Coupons</h1>
         <button
-          className="px-4 py-1 bg-[#45AEF1] text-white rounded-md hover:bg-[#3791d5]"
-          onClick={() => setCreateModalOpen(true)}
+          onClick={() => {
+            setModalOpen(true);
+            setEditData(null);
+          }}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          Create
+          Create Coupon
         </button>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto mt-4">
-        <table className="min-w-full border text-center text-sm">
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 text-sm text-center">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border">ID</th>
-              <th className="p-2 border">Coupon Name</th>
-              <th className="p-2 border">Value</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Price</th>
               <th className="p-2 border">Type</th>
               <th className="p-2 border">Start Date</th>
               <th className="p-2 border">End Date</th>
@@ -131,65 +148,66 @@ const Coupon = () => {
             </tr>
           </thead>
           <tbody>
-            {coupons.map((coupon) => (
-              <tr key={coupon.id} className="hover:bg-gray-50">
-                <td className="p-2 border">{coupon.id}</td>
-                <td className="p-2 border">{coupon.name}</td>
-                <td className="p-2 border">{coupon.price}</td>
-                <td className="p-2 border capitalize">{coupon.type}</td>
-                <td className="p-2 border">{coupon.startDate}</td>
-                <td className="p-2 border">{coupon.endDate}</td>
-                <td className="p-2 border flex justify-center gap-2">
-                  <button
-                    className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500"
-                    onClick={() => {
-                      setCurrentCoupon(coupon);
-                      setEditModalOpen(true);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    onClick={() =>
-                      setCoupons(coupons.filter((c) => c.id !== coupon.id))
-                    }
-                  >
-                    Delete
-                  </button>
+            {coupons.length > 0 ? (
+              coupons.map((c) => (
+                <tr key={c.id} className="hover:bg-gray-50">
+                  <td className="p-2 border">{c.id}</td>
+                  <td className="p-2 border">{c.name}</td>
+                  <td className="p-2 border">{c.discountPrice}</td>
+                  <td className="p-2 border capitalize">{c.discountType}</td>
+                  <td className="p-2 border">{c.startDate}</td>
+                  <td className="p-2 border">{c.endDate}</td>
+                  <td className="p-2 border flex justify-center gap-2">
+                    <button
+                      onClick={() => {
+                        setEditData(c);
+                        setModalOpen(true);
+                      }}
+                      className="bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(c.id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="7"
+                  className="p-4 text-gray-500 text-center border"
+                >
+                  No coupons found
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Create Modal */}
-      {createModalOpen && (
+      {/* Modal */}
+      {modalOpen && (
         <CouponModal
-          title="Create Coupon"
-          onClose={() => setCreateModalOpen(false)}
-          onSave={(data) => {
-            setCoupons([...coupons, { id: coupons.length + 1, ...data }]);
-            setCreateModalOpen(false);
+          title={editData ? "Edit Coupon" : "Create Coupon"}
+          initialData={
+            editData || {
+              name: "",
+              price: "",
+              type: "percentage",
+              startDate: "",
+              endDate: "",
+            }
+          }
+          onClose={() => {
+            setModalOpen(false);
+            setEditData(null);
           }}
-        />
-      )}
-
-      {/* Edit Modal */}
-      {editModalOpen && currentCoupon && (
-        <CouponModal
-          title="Edit Coupon"
-          initialData={currentCoupon}
-          onClose={() => setEditModalOpen(false)}
-          onSave={(data) => {
-            setCoupons(
-              coupons.map((c) =>
-                c.id === currentCoupon.id ? { ...c, ...data } : c
-              )
-            );
-            setEditModalOpen(false);
-          }}
+          onSave={handleSave}
         />
       )}
     </div>

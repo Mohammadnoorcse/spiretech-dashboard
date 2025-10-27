@@ -1,16 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-// Reusable Modal for Brand
+import api from "../api/axios";
+
+// ======================= Brand Modal =======================
 const BrandModal = ({ title, initialData = { name: "", status: "Active", image: "" }, onClose, onSave }) => {
   const [formData, setFormData] = useState(initialData);
+  const [preview, setPreview] = useState(`${import.meta.env.VITE_API_BASE_URL}${initialData.image}` || "");
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setFormData({ ...formData, image: file });
+
+      // preview
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result });
-      };
+      reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -37,7 +41,7 @@ const BrandModal = ({ title, initialData = { name: "", status: "Active", image: 
             <option value="Inactive">Inactive</option>
           </select>
           <input type="file" onChange={handleImageChange} className="border p-2 rounded w-full" />
-          {formData.image && <img src={formData.image} alt="Preview" className="w-24 h-24 object-cover rounded mt-2" />}
+          {preview && <img src={preview} alt="Preview" className="w-24 h-24 object-cover rounded mt-2" />}
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
@@ -53,22 +57,80 @@ const BrandModal = ({ title, initialData = { name: "", status: "Active", image: 
   );
 };
 
-// Main Brand Component
+// ======================= Brand Component =======================
 const Brand = () => {
-  const [brands, setBrands] = useState([
-    { id: 1, name: "Apple", status: "Active", image: "" },
-    { id: 2, name: "Nike", status: "Inactive", image: "" },
-  ]);
-
+  const [brands, setBrands] = useState([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentBrand, setCurrentBrand] = useState(null);
+
+  
+
+  // Fetch all brands
+  const fetchBrands = async () => {
+    try {
+      const res = await api.get('api/brand');
+      setBrands(res.data);
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBrands();
+  }, []);
+
+  // Create brand
+  const handleCreate = async (data) => {
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("status", data.status === "Active" ? 1 : 0);
+      if (data.image) formData.append("image", data.image);
+
+      await api.post('api/brand', formData, { headers: { "Content-Type": "multipart/form-data" } });
+      setCreateModalOpen(false);
+      fetchBrands();
+    } catch (error) {
+      console.error("Error creating brand:", error);
+    }
+  };
+
+  // Update brand
+  const handleUpdate = async (data) => {
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("status", data.status === "Active" ? 1 : 0);
+      if (data.image instanceof File) formData.append("image", data.image);
+
+      await api.post(`api/brand/${currentBrand.id}?_method=PUT`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setEditModalOpen(false);
+      fetchBrands();
+    } catch (error) {
+      console.error("Error updating brand:", error);
+    }
+  };
+
+  // Delete brand
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this brand?")) {
+      try {
+        await api.delete(`api/brand/${id}`);
+        fetchBrands();
+      } catch (error) {
+        console.error("Error deleting brand:", error);
+      }
+    }
+  };
 
   return (
     <div className="w-full flex flex-col gap-4 p-2">
       {/* Header */}
       <div className="w-full flex items-center justify-between">
-        <h1 className="text-base font-bold">Brand</h1>
+        <h1 className="text-base font-bold">Brands</h1>
         <button
           className="px-4 py-1 bg-[#45AEF1] text-white rounded-md hover:bg-[#3791d5]"
           onClick={() => setCreateModalOpen(true)}
@@ -79,43 +141,40 @@ const Brand = () => {
 
       {/* Table */}
       <div className="overflow-x-auto mt-4">
-        <table className="min-w-full border text-center">
+        <table className="min-w-full border border-gray-300 text-center">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Image</th>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Status</th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-2 border border-gray-300">ID</th>
+              <th className="p-2 border border-gray-300">Image</th>
+              <th className="p-2 border border-gray-300">Name</th>
+              <th className="p-2 border border-gray-300">Status</th>
+              <th className="p-2 border border-gray-300">Actions</th>
             </tr>
           </thead>
           <tbody>
             {brands.map((brand) => (
               <tr key={brand.id} className="hover:bg-gray-50">
-                <td className="p-2 border">{brand.id}</td>
-                <td className="p-2 border">
+                <td className="p-2 border border-gray-300">{brand.id}</td>
+                <td className="p-2 border border-gray-300">
                   {brand.image ? (
-                    <img src={brand.image} alt={brand.name} className="w-12 h-12 object-cover rounded mx-auto" />
+                    <img src={`${import.meta.env.VITE_API_BASE_URL}${brand.image}`} alt={brand.name} className="w-12 h-12 object-cover rounded mx-auto" />
                   ) : (
                     "No Image"
                   )}
                 </td>
-                <td className="p-2 border">{brand.name}</td>
-                <td className="p-2 border">{brand.status}</td>
-                <td className="p-2 border flex justify-center gap-2">
+                <td className="p-2 border border-gray-300">{brand.name}</td>
+                <td className="p-2 border border-gray-300">{brand.status === 1 ? "Active" : "Inactive"}</td>
+                <td className="p-2 border border-gray-300 flex justify-center gap-2">
                   <button
                     className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500"
                     onClick={() => {
-                      setCurrentBrand(brand);
+                      setCurrentBrand({ ...brand, status: brand.status === 1 ? "Active" : "Inactive" });
                       setEditModalOpen(true);
                     }}
                   >
                     Edit
                   </button>
-                  <button
-                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    onClick={() => setBrands(brands.filter((b) => b.id !== brand.id))}
-                  >
+                  <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" onClick={() => handleDelete(brand.id)}>
                     Delete
                   </button>
                 </td>
@@ -126,28 +185,11 @@ const Brand = () => {
       </div>
 
       {/* Create Modal */}
-      {createModalOpen && (
-        <BrandModal
-          title="Create Brand"
-          onClose={() => setCreateModalOpen(false)}
-          onSave={(data) => {
-            setBrands([...brands, { id: brands.length + 1, ...data }]);
-            setCreateModalOpen(false);
-          }}
-        />
-      )}
+      {createModalOpen && <BrandModal title="Create Brand" onClose={() => setCreateModalOpen(false)} onSave={handleCreate} />}
 
       {/* Edit Modal */}
       {editModalOpen && currentBrand && (
-        <BrandModal
-          title="Edit Brand"
-          initialData={currentBrand}
-          onClose={() => setEditModalOpen(false)}
-          onSave={(data) => {
-            setBrands(brands.map((b) => (b.id === currentBrand.id ? { ...b, ...data } : b)));
-            setEditModalOpen(false);
-          }}
-        />
+        <BrandModal title="Edit Brand" initialData={currentBrand} onClose={() => setEditModalOpen(false)} onSave={handleUpdate} />
       )}
     </div>
   );

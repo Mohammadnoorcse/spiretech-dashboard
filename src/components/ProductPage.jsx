@@ -1,38 +1,68 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProductList from "./ProductList";
 import EditProduct from "./EditProduct";
+import api from "../api/axios";
 
 const ProductPage = () => {
-const [products, setProducts] = useState([
-    { id: 1, name: "Minimal Leather Bag", sku: "LB-001", price: 79.0, stock: 12, category: "Bags", img: "https://picsum.photos/200?1" },
-    { id: 2, name: "Running Sneakers", sku: "SN-532", price: 129.99, stock: 5, category: "Shoes", img: "https://picsum.photos/200?2" },
-    { id: 3, name: "Classic Watch", sku: "WT-110", price: 199.0, stock: 0, category: "Accessories", img: "https://picsum.photos/200?3" },
-    { id: 4, name: "Denim Jacket", sku: "JK-220", price: 99.5, stock: 21, category: "Clothing", img: "https://picsum.photos/200?4" },
-    { id: 5, name: "Bluetooth Speaker", sku: "SP-75", price: 59.99, stock: 8, category: "Electronics", img: "https://picsum.photos/200?5" },
-    { id: 6, name: "Sunglasses", sku: "SG-12", price: 25.0, stock: 40, category: "Accessories", img: "https://picsum.photos/200?6" },
-  ]);
-
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await api.get("/api/products");
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCancel = () => {
-    setEditingProduct(null);
+  const handleEdit = (product) => setEditingProduct(product);
+  const handleCancel = () => setEditingProduct(null);
+
+  const handleUpdate = async (formData, productId) => {
+    if (!productId) return console.error("Product ID missing!");
+
+    try {
+      const res = await api.post(`/api/products/${productId}?_method=PUT`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setProducts((prev) =>
+        prev.map((p) => (p.id === res.data.id ? res.data : p))
+      );
+      setEditingProduct(null);
+      alert("✅ Product updated successfully!");
+    } catch (err) {
+      console.error("Update error:", err);
+      alert("❌ Failed to update product!");
+    }
   };
 
-  const handleUpdate = (updatedProduct) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-    );
-    setEditingProduct(null);
+  const handleDelete = async (id) => {
+    if (!window.confirm("🗑️ Are you sure you want to delete this product?")) return;
+    try {
+      await api.delete(`/api/products/${id}`);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      alert("✅ Product deleted successfully!");
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("❌ Failed to delete product!");
+    }
   };
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
       {!editingProduct ? (
-        <ProductList products={products} onEdit={handleEdit} />
+        <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} />
       ) : (
         <div>
           <button
@@ -41,7 +71,11 @@ const [products, setProducts] = useState([
           >
             ← Back to List
           </button>
-          <EditProduct existingProduct={editingProduct} onSave={handleUpdate} />
+          <EditProduct
+            existingProduct={editingProduct}
+            productId={editingProduct.id}
+            onSave={handleUpdate}
+          />
         </div>
       )}
     </div>

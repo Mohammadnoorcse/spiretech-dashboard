@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../api/axios";
 
-// Discount Modal (used for create and edit)
+// ================= Discount Modal =================
 const DiscountModal = ({
   title,
   initialData = {
-    productId: "",
+    name: "",
     discountPrice: "",
     discountType: "percentage",
     startDate: "",
     endDate: "",
+    status: "Active",
   },
   onClose,
   onSave,
@@ -23,13 +25,12 @@ const DiscountModal = ({
         <div className="flex flex-col gap-3">
           <input
             type="text"
-            placeholder="Product ID"
-            value={formData.productId}
-            onChange={(e) =>
-              setFormData({ ...formData, productId: e.target.value })
-            }
+            placeholder="Name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="border p-2 rounded w-full"
           />
+
           <input
             type="number"
             placeholder="Discount Price"
@@ -39,6 +40,7 @@ const DiscountModal = ({
             }
             className="border p-2 rounded w-full"
           />
+
           <select
             value={formData.discountType}
             onChange={(e) =>
@@ -49,6 +51,7 @@ const DiscountModal = ({
             <option value="percentage">Percentage</option>
             <option value="fixed">Fixed</option>
           </select>
+
           <input
             type="date"
             value={formData.startDate}
@@ -65,6 +68,17 @@ const DiscountModal = ({
             }
             className="border p-2 rounded w-full"
           />
+
+          <select
+            value={formData.status}
+            onChange={(e) =>
+              setFormData({ ...formData, status: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          >
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
@@ -86,22 +100,80 @@ const DiscountModal = ({
   );
 };
 
-// Main Discount Component
+// ================= Discount Main Component =================
 const Discount = () => {
-  const [discounts, setDiscounts] = useState([
-    {
-      id: 1,
-      productId: "P001",
-      discountPrice: 20,
-      discountType: "percentage",
-      startDate: "2025-10-20",
-      endDate: "2025-10-30",
-    },
-  ]);
-
+  const [discounts, setDiscounts] = useState([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentDiscount, setCurrentDiscount] = useState(null);
+
+  const API_URL = "http://127.0.0.1:8000/api/discounts"; // Laravel API
+
+  // Load discounts from API
+  useEffect(() => {
+    fetchDiscounts();
+  }, []);
+
+  const fetchDiscounts = async () => {
+    try {
+      const res = await api.get('api/discounts');
+      setDiscounts(res.data);
+    } catch (err) {
+      console.error("Error fetching discounts:", err);
+    }
+  };
+
+  // Create discount
+  const handleCreate = async (data) => {
+    try {
+      const payload = {
+        name: data.name,
+        discountPrice: data.discountPrice,
+        discountType: data.discountType,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        status: data.status === "Active" ? 1 : 0,
+      };
+      const res = await axios.post(API_URL, payload);
+      setDiscounts([...discounts, res.data.data]);
+      setCreateModalOpen(false);
+    } catch (err) {
+      console.error("Error creating discount:", err);
+    }
+  };
+
+  // Update discount
+  const handleUpdate = async (data) => {
+    try {
+      const payload = {
+        name: data.name,
+        discountPrice: data.discountPrice,
+        discountType: data.discountType,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        status: data.status === "Active" ? 1 : 0,
+      };
+      const res = await api.put(`api/discounts/${currentDiscount.id}`, payload);
+      setDiscounts(
+        discounts.map((d) => (d.id === currentDiscount.id ? res.data.data : d))
+      );
+      setEditModalOpen(false);
+    } catch (err) {
+      console.error("Error updating discount:", err);
+    }
+  };
+
+  // Delete discount
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this discount?")) return;
+
+    try {
+      await api.delete(`api/discounts/${id}`);
+      setDiscounts(discounts.filter((d) => d.id !== id));
+    } catch (err) {
+      console.error("Error deleting discount:", err);
+    }
+  };
 
   return (
     <div className="w-full flex flex-col gap-4 p-2">
@@ -118,32 +190,34 @@ const Discount = () => {
 
       {/* Table */}
       <div className="overflow-x-auto mt-4">
-        <table className="min-w-full border text-center text-sm">
+        <table className="min-w-full border border-gray-300 text-center text-sm">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Product ID</th>
-              <th className="p-2 border">Discount Price</th>
-              <th className="p-2 border">Type</th>
-              <th className="p-2 border">Start Date</th>
-              <th className="p-2 border">End Date</th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-2 border border-gray-300">ID</th>
+              <th className="p-2 border border-gray-300">Name</th>
+              <th className="p-2 border border-gray-300">Discount Price</th>
+              <th className="p-2 border border-gray-300">Type</th>
+              <th className="p-2 border border-gray-300">Start Date</th>
+              <th className="p-2 border border-gray-300">End Date</th>
+              <th className="p-2 border border-gray-300">Status</th>
+              <th className="p-2 border border-gray-300">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {discounts.map((discount) => (
-              <tr key={discount.id} className="hover:bg-gray-50">
-                <td className="p-2 border">{discount.id}</td>
-                <td className="p-2 border">{discount.productId}</td>
-                <td className="p-2 border">{discount.discountPrice}</td>
-                <td className="p-2 border capitalize">{discount.discountType}</td>
-                <td className="p-2 border">{discount.startDate}</td>
-                <td className="p-2 border">{discount.endDate}</td>
-                <td className="p-2 border flex justify-center gap-2">
+            {discounts.map((d) => (
+              <tr key={d.id} className="hover:bg-gray-50">
+                <td className="p-2 border border-gray-300">{d.id}</td>
+                <td className="p-2 border border-gray-300">{d.name}</td>
+                <td className="p-2 border border-gray-300">{d.discountPrice}</td>
+                <td className="p-2 border border-gray-300 capitalize">{d.discountType}</td>
+                <td className="p-2 border border-gray-300">{d.startDate}</td>
+                <td className="p-2 border border-gray-300">{d.endDate}</td>
+                <td className="p-2 border border-gray-300">{d.status === 1 ? "Active" : "Inactive"}</td>
+                <td className="p-2 border border-gray-300 flex justify-center gap-2">
                   <button
                     className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500"
                     onClick={() => {
-                      setCurrentDiscount(discount);
+                      setCurrentDiscount(d);
                       setEditModalOpen(true);
                     }}
                   >
@@ -151,11 +225,7 @@ const Discount = () => {
                   </button>
                   <button
                     className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    onClick={() =>
-                      setDiscounts(
-                        discounts.filter((d) => d.id !== discount.id)
-                      )
-                    }
+                    onClick={() => handleDelete(d.id)}
                   >
                     Delete
                   </button>
@@ -166,32 +236,24 @@ const Discount = () => {
         </table>
       </div>
 
-      {/* Create Modal */}
+      {/* Modals */}
       {createModalOpen && (
         <DiscountModal
           title="Create Discount"
           onClose={() => setCreateModalOpen(false)}
-          onSave={(data) => {
-            setDiscounts([...discounts, { id: discounts.length + 1, ...data }]);
-            setCreateModalOpen(false);
-          }}
+          onSave={handleCreate}
         />
       )}
 
-      {/* Edit Modal */}
       {editModalOpen && currentDiscount && (
         <DiscountModal
           title="Edit Discount"
-          initialData={currentDiscount}
-          onClose={() => setEditModalOpen(false)}
-          onSave={(data) => {
-            setDiscounts(
-              discounts.map((d) =>
-                d.id === currentDiscount.id ? { ...d, ...data } : d
-              )
-            );
-            setEditModalOpen(false);
+          initialData={{
+            ...currentDiscount,
+            status: currentDiscount.status === 1 ? "Active" : "Inactive",
           }}
+          onClose={() => setEditModalOpen(false)}
+          onSave={handleUpdate}
         />
       )}
     </div>
