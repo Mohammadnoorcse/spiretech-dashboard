@@ -134,7 +134,7 @@ const Discount = () => {
         endDate: data.endDate,
         status: data.status === "Active" ? 1 : 0,
       };
-      const res = await axios.post(API_URL, payload);
+      const res = await api.post('api/discounts', payload);
       setDiscounts([...discounts, res.data.data]);
       setCreateModalOpen(false);
     } catch (err) {

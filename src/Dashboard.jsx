@@ -15,6 +15,7 @@ import Section from './components/Section';
 import OrderList from './components/OrderList';
 import Feature from './components/Feature';
 import Shipping from './components/Shipping';
+import UserList from './components/UserList';
 
 // Example dummy components for different sections
 // const DashboardHome = () => <div>📊 Dashboard Overview</div>;
@@ -58,6 +59,8 @@ const Dashboard = () => {
         return <OrderList />;
       case 'Feature List':
         return <Feature />;
+      case 'user':
+        return <UserList />;
       
       default:
         return <div>🔍 Page Not Found</div>;

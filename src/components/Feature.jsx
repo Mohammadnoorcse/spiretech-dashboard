@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import HeaderImage from "./Feature/Dashboard/HeaderImage";
+import HeaderImageweb from "./Feature/website/HeaderImage";
 import ThemeColorsPage from "./Feature/Dashboard/ThemeColorsPage";
+import DashboardTopPage from "./Feature/Dashboard/DashboardTopPage";
+import FooterImage from "./Feature/website/FooterImage";
+import WebHome from "./Feature/website/WebHome";
+import ContactPage from "./Feature/website/ContactPage";
+import SocialMediaPage from "./Feature/website/SocialMediaPage";
+import SliderPage from "./Feature/website/SliderPage";
+import VideoPage from "./Feature/website/VideoPage";
 
 // 🔹 Dashboard feature components
 const DashboardFeature = () => (
@@ -83,7 +91,7 @@ const Feature = () => {
       case "Sidebar":
         return <ThemeColorsPage />;
       case "Topbar":
-        return <TopbarFeature />;
+        return <DashboardTopPage />;
       default:
         return null;
     }
@@ -93,11 +101,19 @@ const Feature = () => {
   const renderWebsite = () => {
     switch (activeWebsiteTab) {
       case "Home":
-        return <WebsiteHome />;
-      case "Product":
-        return <WebsiteProduct />;
+        return <WebHome />;
+      case "Header Logo":
+        return <HeaderImageweb />;
+      case "Footer Logo":
+        return <FooterImage/>;
+      case "Slider":
+        return <SliderPage />;
       case "Contact":
-        return <WebsiteContact />;
+        return <ContactPage />;
+      case "Social":
+        return <SocialMediaPage />;
+      case "Video":
+        return <VideoPage />;
       default:
         return null;
     }
@@ -130,7 +146,7 @@ const Feature = () => {
       <h1 className="font-medium text-lg mb-3 mt-10">Website Feature List</h1>
 
       <div className="flex gap-3 items-center mt-4 flex-wrap">
-        {["Home", "Product", "Contact"].map((tab) => (
+        {["Home","Header Logo","Footer Logo", "Slider","Video", "Contact","Social"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveWebsiteTab(tab)}

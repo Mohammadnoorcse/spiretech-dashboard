@@ -4,6 +4,7 @@ import { FaDesktop, FaAngleDown, FaAngleUp } from "react-icons/fa";
 import { MdOutlineFeaturedVideo } from "react-icons/md";
 import { RiProductHuntLine } from "react-icons/ri";
 import { FaFirstOrderAlt } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 
 const Sidebar = ({ activeItem, setActiveItem, styleConfig }) => {
   const [openSection, setOpenSection] = useState(null);
@@ -35,6 +36,12 @@ const Sidebar = ({ activeItem, setActiveItem, styleConfig }) => {
       title: 'Orders',
       icon: <FaFirstOrderAlt />,
       subItems: ['Order List', 'Add New', 'Categories']
+    },
+    {
+      id: 'user',
+      title: 'Users',
+      icon: <FaUser />,
+      subItems: []
     },
     {
       id: 'features',
