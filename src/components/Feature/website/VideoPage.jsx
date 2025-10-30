@@ -13,7 +13,7 @@ const VideoModal = ({ title, initialData = { title: "", video: null, status: "ac
   };
 
   const handleSave = () => {
-    if (!form.title || !form.video) return alert("Please provide title and video.");
+    // if (!form.title || !form.video) return alert("Please provide title and video.");
     onSave(form);
   };
 
@@ -29,7 +29,7 @@ const VideoModal = ({ title, initialData = { title: "", video: null, status: "ac
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="Video title"
-              className="border rounded p-2 w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             />
           </div>
           <div>
@@ -75,29 +75,31 @@ const VideoPage = () => {
     fetchVideos();
   }, []);
 
-  const handleSave = async (data) => {
-    const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("status", data.status);
-    formData.append("video", data.video);
+const handleSave = async (data) => {
+  const formData = new FormData();
 
-    if (current) {
-      // update
-      await axios.post(`http://localhost:8000/api/videos/${current.id}?_method=PUT`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-    } else {
-      // create
-      await axios.post("http://localhost:8000/api/videos", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-    }
+  if (data.title) formData.append("title", data.title);
+  if (data.status) formData.append("status", data.status);
+  if (data.video instanceof File) formData.append("video", data.video); // ✅ only send if it's a file
 
-    fetchVideos();
-    setCreateOpen(false);
-    setEditOpen(false);
-    setCurrent(null);
-  };
+  if (current) {
+    // update
+    await axios.post(`http://localhost:8000/api/videos/${current.id}?_method=PUT`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  } else {
+    // create
+    await axios.post("http://localhost:8000/api/videos", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  }
+
+  fetchVideos();
+  setCreateOpen(false);
+  setEditOpen(false);
+  setCurrent(null);
+};
+
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this video?")) return;
@@ -109,17 +111,17 @@ const VideoPage = () => {
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold">Video Upload</h1>
-        <button onClick={() => setCreateOpen(true)} className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600">+ Add Video</button>
+        <button onClick={() => setCreateOpen(true)} className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600">Add Video</button>
       </div>
-      <div className="overflow-x-auto bg-white border rounded-lg shadow-sm">
+      <div className="overflow-x-auto bg-white border border-gray-300">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 border">ID</th>
-              <th className="p-3 border">Title</th>
-              <th className="p-3 border">Video</th>
-              <th className="p-3 border">Status</th>
-              <th className="p-3 border">Actions</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">ID</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Title</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Video</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Status</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -130,13 +132,13 @@ const VideoPage = () => {
             )}
             {videos.map(v => (
               <tr key={v.id} className="hover:bg-gray-50 transition">
-                <td className="p-3 border text-center">{v.id}</td>
-                <td className="p-3 border">{v.title}</td>
-                <td className="p-3 border text-center">
+                <td className="p-2 border border-gray-300 text-center text-sm font-medium ">{v.id}</td>
+                <td className="p-2 border border-gray-300 text-center text-sm font-medium">{v.title}</td>
+                <td className="p-2 border border-gray-300 text-center text-sm font-medium ">
                   <video src={`http://localhost:8000/storage/${v.path}`} controls className="w-40 h-24 object-cover rounded mx-auto"></video>
                 </td>
-                <td className="p-3 border text-center">{v.status}</td>
-                <td className="p-3 border text-center flex justify-center gap-2">
+                <td className="p-2 border border-gray-300 text-center text-sm font-medium ">{v.status}</td>
+                <td className="p-2 border border-gray-300 text-center text-sm font-medium flex justify-center gap-2">
                   <button onClick={() => { setCurrent(v); setEditOpen(true); }} className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 text-xs">Edit</button>
                   <button onClick={() => handleDelete(v.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs">Delete</button>
                 </td>

@@ -27,7 +27,7 @@ const SocialMediaModal = ({
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Enter social media name"
-              className="border rounded p-2 w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             />
           </div>
 
@@ -38,7 +38,7 @@ const SocialMediaModal = ({
               value={form.url}
               onChange={(e) => setForm({ ...form, url: e.target.value })}
               placeholder="https://example.com"
-              className="border rounded p-2 w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             />
           </div>
 
@@ -47,7 +47,7 @@ const SocialMediaModal = ({
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="border rounded p-2 w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -95,20 +95,20 @@ const SocialMediaPage = () => {
           onClick={() => setCreateOpen(true)}
           className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600"
         >
-          + Add
+          Add
         </button>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white border rounded-lg shadow-sm">
+      <div className="overflow-x-auto bg-white border border-gray-300">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 border">ID</th>
-              <th className="p-3 border">Name</th>
-              <th className="p-3 border">URL</th>
-              <th className="p-3 border">Status</th>
-              <th className="p-3 border">Actions</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">ID</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Name</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">URL</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Status</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -124,9 +124,9 @@ const SocialMediaPage = () => {
             )}
             {items.map((it) => (
               <tr key={it.id} className="hover:bg-gray-50 transition">
-                <td className="p-3 border text-center">{it.id}</td>
-                <td className="p-3 border">{it.name}</td>
-                <td className="p-3 border">
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">{it.id}</td>
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">{it.name}</td>
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">
                   <a
                     href={it.url}
                     target="_blank"
@@ -136,7 +136,7 @@ const SocialMediaPage = () => {
                     {it.url}
                   </a>
                 </td>
-                <td className="p-3 border text-center">
+                <td className="p-2 text-sm border border-gray-300 text-gray-400  text-center">
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
                       it.status === "active"
@@ -147,7 +147,7 @@ const SocialMediaPage = () => {
                     {it.status}
                   </span>
                 </td>
-                <td className="p-3 border text-center">
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center text-center">
                   <div className="flex justify-center gap-2">
                     <button
                       onClick={() => {

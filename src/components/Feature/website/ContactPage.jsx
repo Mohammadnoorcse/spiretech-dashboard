@@ -27,7 +27,7 @@ const ContactModal = ({
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Enter name"
-              className="border rounded p-2 w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             />
           </div>
 
@@ -38,7 +38,7 @@ const ContactModal = ({
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               placeholder="Enter address"
-              className="border rounded p-2 w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             />
           </div>
 
@@ -49,7 +49,7 @@ const ContactModal = ({
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="Enter email"
-              className="border rounded p-2 w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             />
           </div>
 
@@ -60,7 +60,7 @@ const ContactModal = ({
               value={form.number}
               onChange={(e) => setForm({ ...form, number: e.target.value })}
               placeholder="Enter phone number"
-              className="border rounded p-2 w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             />
           </div>
         </div>
@@ -98,26 +98,26 @@ const ContactPage = () => {
     <div className="p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold text-gray-700">Contact Page</h1>
+        <h1 className="text-base font-bold">Contact Page</h1>
         <button
           onClick={() => setCreateOpen(true)}
           className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600"
         >
-          + Create
+          Create
         </button>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white border rounded-lg shadow-sm">
+      <div className="overflow-x-auto bg-white border border-gray-300 ">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 border">ID</th>
-              <th className="p-3 border">Name</th>
-              <th className="p-3 border">Address</th>
-              <th className="p-3 border">Email</th>
-              <th className="p-3 border">Number</th>
-              <th className="p-3 border">Actions</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium ">ID</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium ">Name</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium ">Address</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Email</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Number</th>
+              <th className="p-2 border border-gray-300 text-center text-sm font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -134,12 +134,12 @@ const ContactPage = () => {
 
             {contacts.map((c) => (
               <tr key={c.id} className="hover:bg-gray-50 transition">
-                <td className="p-3 border text-center">{c.id}</td>
-                <td className="p-3 border">{c.name}</td>
-                <td className="p-3 border">{c.address}</td>
-                <td className="p-3 border">{c.email}</td>
-                <td className="p-3 border">{c.number}</td>
-                <td className="p-3 border text-center">
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">{c.id}</td>
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">{c.name}</td>
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">{c.address}</td>
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">{c.email}</td>
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">{c.number}</td>
+                <td className="p-2 text-sm border border-gray-300 text-gray-400 text-center">
                   <div className="flex justify-center gap-2">
                     <button
                       onClick={() => {

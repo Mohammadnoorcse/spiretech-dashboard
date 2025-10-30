@@ -1,70 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import api from "../../../api/axios";
 
-// Modal Component
-const FooterImageModal = ({
-  title,
-  initialData = { filename: "", image: "", width: "", height: "", status: "active" },
-  onClose,
-  onSave,
-}) => {
+const API_URL = "http://localhost:8000/api/webfooterlogo"; // update for production
+
+// 🔹 Modal Component
+const FooterImageModal = ({ title, initialData, onClose, onSave }) => {
   const [form, setForm] = useState(initialData);
 
-  // Handle image upload
   const handleFile = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      setForm((p) => ({ ...p, image: reader.result, filename: file.name }));
+      setForm((p) => ({
+        ...p,
+        imagePreview: reader.result,
+        imageFile: file,
+        filename: file.name,
+      }));
     };
     reader.readAsDataURL(file);
   };
 
-  // Handle save
   const handleSave = () => {
-    if (!form.image) return alert("Please select an image.");
+    if (!form.imageFile && !form.imagePreview)
+      return alert("Please select an image.");
     if (!form.width || !form.height) return alert("Enter width and height.");
-    onSave({
-      filename: form.filename,
-      image: form.image,
-      width: Number(form.width),
-      height: Number(form.height),
-      status: form.status,
-    });
+    onSave(form);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
         <h2 className="text-lg font-semibold mb-4">{title}</h2>
 
         <div className="space-y-3">
-          {/* Image Upload */}
           <div>
             <label className="text-sm block mb-1">Upload Image</label>
-            <input type="file" accept="image/*" onChange={handleFile} className="border rounded p-2 w-full" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFile}
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
+            />
           </div>
 
-          {form.image && (
+         {(form.imagePreview || form.image) && (
             <div className="flex items-center gap-3">
-              <img src={form.image} alt="preview" className="w-24 h-20 object-cover rounded border" />
-              <div>
-                <p className="text-sm font-medium">{form.filename || "Uploaded image"}</p>
+                <img
+                src={
+                    form.imagePreview
+                    ? form.imagePreview 
+                    : `${import.meta.env.VITE_API_BASE_URL}storage/${form.image}` 
+                }
+                alt="preview"
+                className="w-24 h-20 object-cover rounded border"
+                />
+                <div>
+                <p className="text-sm font-medium">{form.filename}</p>
                 <p className="text-xs text-gray-500">Preview of uploaded file</p>
-              </div>
+                </div>
             </div>
-          )}
+            )}
 
-          {/* Width + Height */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm block mb-1">Width (px)</label>
               <input
                 type="number"
                 value={form.width}
-                onChange={(e) => setForm((p) => ({ ...p, width: e.target.value }))}
-                className="border rounded p-2 w-full"
-                placeholder="e.g. 1200"
+                onChange={(e) => setForm({ ...form, width: e.target.value })}
+                className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
               />
             </div>
             <div>
@@ -72,20 +79,18 @@ const FooterImageModal = ({
               <input
                 type="number"
                 value={form.height}
-                onChange={(e) => setForm((p) => ({ ...p, height: e.target.value }))}
-                className="border rounded p-2 w-full"
-                placeholder="e.g. 400"
+                onChange={(e) => setForm({ ...form, height: e.target.value })}
+                className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
               />
             </div>
           </div>
 
-          {/* Status */}
           <div>
             <label className="text-sm block mb-1">Status</label>
             <select
               value={form.status}
-              onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
-              className="border rounded p-2 w-full"
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -93,12 +98,17 @@ const FooterImageModal = ({
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="flex justify-end gap-3 mt-5">
-          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+          >
             Cancel
           </button>
-          <button onClick={handleSave} className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+          >
             Save
           </button>
         </div>
@@ -107,35 +117,78 @@ const FooterImageModal = ({
   );
 };
 
-// Main Component
+// 🔹 Main Component
 const FooterImage = () => {
   const [items, setItems] = useState([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [current, setCurrent] = useState(null);
 
-  const nextId = () => (items.length ? Math.max(...items.map((i) => i.id)) + 1 : 1);
+  // Fetch items
+  useEffect(() => {
+    api.get('api/webfooterlogo').then((res) => setItems(res.data));
+  }, []);
+
+  // Create item
+  const createFooterImage = async (data) => {
+    const formData = new FormData();
+    formData.append("image", data.imageFile);
+    formData.append("width", data.width);
+    formData.append("height", data.height);
+    formData.append("status", data.status);
+
+    const res = await api.post('api/webfooterlogo', formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    setItems((prev) => [res.data, ...prev]);
+    setCreateOpen(false);
+  };
+
+  // Update item
+  const updateFooterImage = async (data) => {
+    const formData = new FormData();
+    if (data.imageFile) formData.append("image", data.imageFile);
+    formData.append("width", data.width);
+    formData.append("height", data.height);
+    formData.append("status", data.status);
+
+    const res = await api.post(`api/webfooterlogo/${current.id}?_method=PUT`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    setItems((prev) =>
+      prev.map((it) => (it.id === current.id ? res.data : it))
+    );
+    setEditOpen(false);
+    setCurrent(null);
+  };
+
+  // Delete item
+  const deleteFooterImage = async (id) => {
+    if (!confirm("Delete this image?")) return;
+    await api.delete(`api/webfooterlogo/${id}`);
+    setItems((prev) => prev.filter((it) => it.id !== id));
+  };
 
   return (
     <div className="w-full p-4">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold">Footer Images</h1>
+        <h1 className="text-base font-bold">Footer Images</h1>
         <button
           onClick={() => setCreateOpen(true)}
           className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600"
         >
-          + Create
+          Create
         </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto bg-white border rounded">
+      <div className="overflow-x-auto bg-white border border-gray-300">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border">ID</th>
               <th className="p-2 border">Preview</th>
-              <th className="p-2 border">Filename</th>
+              
               <th className="p-2 border">Width</th>
               <th className="p-2 border">Height</th>
               <th className="p-2 border">Status</th>
@@ -143,80 +196,79 @@ const FooterImage = () => {
             </tr>
           </thead>
           <tbody>
-            {items.length === 0 && (
+            {items.length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center text-gray-500 p-4">
+                <td colSpan="7" className="text-center p-4 text-gray-500">
                   No footer images found.
                 </td>
               </tr>
-            )}
-            {items.map((it) => (
-              <tr key={it.id} className="hover:bg-gray-50 transition">
-                <td className="p-2 border text-center">{it.id}</td>
-                <td className="p-2 border text-center">
-                  {it.image ? (
-                    <img src={it.image} alt={it.filename} className="w-32 h-16 object-cover rounded mx-auto" />
-                  ) : (
-                    <div className="w-32 h-16 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500 mx-auto">
-                      No preview
+            ) : (
+              items.map((it) => (
+                <tr key={it.id}>
+                  <td className="border p-2 text-center">{it.id}</td>
+                  <td className="border p-2 text-center">
+                    <img
+                      
+                      src={`${import.meta.env.VITE_API_BASE_URL}storage/${it.image}`}
+                      alt={it.filename}
+                      className="w-32 h-16 object-cover mx-auto rounded"
+                    />
+                  </td>
+                  
+                  <td className="border p-2 text-center">{it.width}</td>
+                  <td className="border p-2 text-center">{it.height}</td>
+                  <td className="border p-2 text-center">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${
+                        it.status === "active"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {it.status}
+                    </span>
+                  </td>
+                  <td className="border p-2 text-center">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => {
+                          setCurrent(it);
+                          setEditOpen(true);
+                        }}
+                        className="px-2 py-1 rounded bg-yellow-400 text-white hover:bg-yellow-500 text-xs"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteFooterImage(it.id)}
+                        className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
+                      >
+                        Delete
+                      </button>
                     </div>
-                  )}
-                </td>
-                <td className="p-2 border text-center">{it.filename}</td>
-                <td className="p-2 border text-center">{it.width}</td>
-                <td className="p-2 border text-center">{it.height}</td>
-                <td className="p-2 border text-center">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      it.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-200 text-gray-600"
-                    }`}
-                  >
-                    {it.status}
-                  </span>
-                </td>
-                <td className="p-2 border text-center">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => {
-                        setCurrent(it);
-                        setEditOpen(true);
-                      }}
-                      className="px-2 py-1 rounded bg-yellow-400 text-white hover:bg-yellow-500 text-xs"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!confirm("Delete this image?")) return;
-                        setItems((prev) => prev.filter((p) => p.id !== it.id));
-                      }}
-                      className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Create Modal */}
       {createOpen && (
         <FooterImageModal
           title="Create Footer Image"
-          onClose={() => setCreateOpen(false)}
-          onSave={(data) => {
-            setItems((prev) => [...prev, { id: nextId(), ...data }]);
-            setCreateOpen(false);
+          initialData={{
+            filename: "",
+            image: "",
+            width: "",
+            height: "",
+            status: "active",
           }}
+          onClose={() => setCreateOpen(false)}
+          onSave={createFooterImage}
         />
       )}
 
-      {/* Edit Modal */}
       {editOpen && current && (
         <FooterImageModal
           title={`Edit Footer Image #${current.id}`}
@@ -225,11 +277,7 @@ const FooterImage = () => {
             setEditOpen(false);
             setCurrent(null);
           }}
-          onSave={(data) => {
-            setItems((prev) => prev.map((it) => (it.id === current.id ? { ...it, ...data } : it)));
-            setEditOpen(false);
-            setCurrent(null);
-          }}
+          onSave={updateFooterImage}
         />
       )}
     </div>

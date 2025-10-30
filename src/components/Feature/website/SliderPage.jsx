@@ -1,80 +1,92 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../../../api/axios";
+// Modal component
+const SliderModal = ({ isOpen, onClose, onSave, initialData }) => {
+  const [form, setForm] = useState({ image: "", status: "active" });
 
-// Modal for Slider
-const SliderModal = ({
-  title,
-  initialData = { image: "", status: "active" },
-  onClose,
-  onSave,
-}) => {
-  const [form, setForm] = useState(initialData);
+  React.useEffect(() => {
+    if (initialData) setForm(initialData);
+    else setForm({ image: "", status: "active" });
+  }, [initialData]);
 
-  const handleFile = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm((p) => ({ ...p, image: reader.result }));
-    };
-    reader.readAsDataURL(file);
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) setForm({ ...form, image: file });
   };
 
-  const handleSave = () => {
-    if (!form.image) return alert("Please select an image.");
-    onSave(form);
+  const handleSaveClick = () => {
+    const formData = new FormData();
+
+    // Only append image if it's a File
+    if (form.image instanceof File) {
+      formData.append("image", form.image);
+    }
+
+    // Always send status
+    formData.append("status", form.status);
+
+    onSave(formData);
   };
+
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold mb-4">{title}</h2>
-
-        <div className="space-y-3">
-          {/* Image Upload */}
-          <div>
-            <label className="text-sm block mb-1">Upload Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFile}
-              className="border rounded p-2 w-full"
-            />
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded shadow-lg w-96">
+        <h2 className="text-xl font-semibold mb-4">Slider Form</h2>
+        <div className="mb-4">
+          <label className="text-sm block mb-1">Upload Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="border border-gray-300 p-2 text-sm rounded w-full"
+          />
 
           {form.image && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mt-2">
               <img
-                src={form.image}
-                alt="preview"
-                className="w-40 h-20 object-cover rounded border"
-              />
+              src={
+                form.image instanceof File
+                  ? URL.createObjectURL(form.image) 
+                  : `${import.meta.env.VITE_API_BASE_URL}/${form.image}` 
+              }
+              alt="preview"
+              className="w-24 h-20 object-cover rounded border"
+            />
+              <div>
+                <p className="text-sm font-medium">Preview</p>
+                <p className="text-xs text-gray-500">
+                  {form.image instanceof File
+                    ? form.image.name
+                    : "Existing Image"}
+                </p>
+              </div>
             </div>
           )}
-
-          {/* Status */}
-          <div>
-            <label className="text-sm block mb-1">Status</label>
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="border rounded p-2 w-full"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
         </div>
-
-        <div className="flex justify-end gap-3 mt-5">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+        <div className="mb-4">
+          <label className="block mb-1">Status</label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
           >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
             Cancel
           </button>
           <button
-            onClick={handleSave}
-            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+            onClick={handleSaveClick}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
           >
             Save
           </button>
@@ -84,133 +96,122 @@ const SliderModal = ({
   );
 };
 
-// Main Slider Page
+// Main page
 const SliderPage = () => {
   const [sliders, setSliders] = useState([]);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [current, setCurrent] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSlider, setEditingSlider] = useState(null);
 
-  const nextId = () =>
-    sliders.length ? Math.max(...sliders.map((s) => s.id)) + 1 : 1;
+  // Fetch sliders from API
+  const fetchSliders = async () => {
+    try {
+      const { data } = await api.get("/api/homesliders");
+      setSliders(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchSliders();
+  }, []);
+
+  const handleCreate = () => {
+    setEditingSlider(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (slider) => {
+    setEditingSlider(slider);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/api/homesliders/${id}`);
+      fetchSliders();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSave = async (formData) => {
+    try {
+      const config = { headers: { "Content-Type": "multipart/form-data" } };
+      if (editingSlider) {
+        await api.post(
+          `/api/homesliders/${editingSlider.id}?_method=PUT`,
+          formData,
+          config
+        );
+      } else {
+        await api.post("/api/homesliders", formData, config);
+      }
+      setIsModalOpen(false);
+      fetchSliders();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold text-gray-700">Slider Management</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Sliders</h1>
         <button
-          onClick={() => setCreateOpen(true)}
-          className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600"
+          onClick={handleCreate}
+          className="px-4 py-2 bg-green-500 text-white rounded"
         >
-          + Create
+          Create Slider
         </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto bg-white border rounded-lg shadow-sm">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 border">ID</th>
-              <th className="p-3 border">Preview</th>
-              <th className="p-3 border">Status</th>
-              <th className="p-3 border">Actions</th>
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border p-2">S/N</th>
+            <th className="border p-2">Image</th>
+            <th className="border p-2">Status</th>
+            <th className="border p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sliders.map((slider, index) => (
+            <tr key={slider.id}>
+              <td className="border p-2 text-center">{index + 1}</td>
+              <td className="border p-2 text-center">
+                <img
+                  src={`${import.meta.env.VITE_API_BASE_URL}/${slider.image}`}
+                  alt="slider"
+                  className="w-20 h-12 object-cover mx-auto"
+                />
+              </td>
+              <td className="border p-2 text-center">{slider.status}</td>
+              <td className="border p-2 text-center flex justify-center gap-2">
+                <button
+                  onClick={() => handleEdit(slider)}
+                  className="px-2 py-1 bg-blue-500 text-white rounded"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(slider.id)}
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {sliders.length === 0 && (
-              <tr>
-                <td colSpan="4" className="text-center p-4 text-gray-500 italic">
-                  No sliders found.
-                </td>
-              </tr>
-            )}
-            {sliders.map((s) => (
-              <tr key={s.id} className="hover:bg-gray-50 transition">
-                <td className="p-3 border text-center">{s.id}</td>
-                <td className="p-3 border text-center">
-                  {s.image ? (
-                    <img
-                      src={s.image}
-                      alt={`slider-${s.id}`}
-                      className="w-40 h-20 object-cover rounded mx-auto"
-                    />
-                  ) : (
-                    <div className="w-40 h-20 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500 mx-auto">
-                      No preview
-                    </div>
-                  )}
-                </td>
-                <td className="p-3 border text-center">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      s.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-200 text-gray-600"
-                    }`}
-                  >
-                    {s.status}
-                  </span>
-                </td>
-                <td className="p-3 border text-center">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => {
-                        setCurrent(s);
-                        setEditOpen(true);
-                      }}
-                      className="px-2 py-1 rounded bg-yellow-400 text-white hover:bg-yellow-500 text-xs"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!confirm("Delete this slider?")) return;
-                        setSliders((prev) => prev.filter((i) => i.id !== s.id));
-                      }}
-                      className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
 
-      {/* Create Modal */}
-      {createOpen && (
-        <SliderModal
-          title="Create Slider"
-          onClose={() => setCreateOpen(false)}
-          onSave={(data) => {
-            setSliders((prev) => [...prev, { id: nextId(), ...data }]);
-            setCreateOpen(false);
-          }}
-        />
-      )}
-
-      {/* Edit Modal */}
-      {editOpen && current && (
-        <SliderModal
-          title={`Edit Slider #${current.id}`}
-          initialData={current}
-          onClose={() => {
-            setEditOpen(false);
-            setCurrent(null);
-          }}
-          onSave={(data) => {
-            setSliders((prev) =>
-              prev.map((s) => (s.id === current.id ? { ...s, ...data } : s))
-            );
-            setEditOpen(false);
-            setCurrent(null);
-          }}
-        />
-      )}
+      <SliderModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        initialData={editingSlider}
+      />
     </div>
   );
 };
