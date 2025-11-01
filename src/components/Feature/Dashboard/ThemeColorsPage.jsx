@@ -170,14 +170,15 @@ const ThemeColorsPage = () => {
               </tr>
             ) : (
               items.map((item) => (
-                <tr key={item.id} className="border border-gray-200">
-                  <td className="p-2 text-sm text-center">{item.id}</td>
-                  <td className="p-2 text-sm text-center">{item.bg_color}</td>
-                  <td className="p-2 text-sm text-center">{item.text_color}</td>
-                  <td className="p-2 text-sm text-center">{item.hover_color}</td>
-                  <td className="p-2 text-sm text-center">{item.active_color}</td>
-                  <td className="p-2 text-sm text-center">{item.border_color}</td>
-                  <td className="p-2 flex justify-center gap-2">
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.id}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.bg_color}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.text_color}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.hover_color}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.active_color}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.border_color}</td>
+                  <td className="p-2 border-t border-gray-200 text-center">
+                  <div className="flex justify-center items-center gap-2">
                     <button
                       onClick={() => {
                         setCurrent(item);
@@ -193,7 +194,10 @@ const ThemeColorsPage = () => {
                     >
                       Delete
                     </button>
-                  </td>
+                  </div>
+                </td>
+                  
+                 
                 </tr>
               ))
             )}

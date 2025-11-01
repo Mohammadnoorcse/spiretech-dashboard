@@ -8,8 +8,23 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState(null);
 
+   const [colorOption, setColorOption] = useState([]);
+    const [sizeOption, setSizeOption] = useState([]);
+    const [brandsOption, setBrandsOption] = useState([]);
+    const [categoriesOption, setCategoriesOption] = useState([]);
+    const [sectionsOption, setSectionsOption] = useState([]);
+    const [discountOptions, setDiscountOptions] = useState([]);
+    const [shippingOption, setShippingOption] = useState([]);
+
   useEffect(() => {
     fetchProducts();
+      fetchColors();
+      fetchBrands();
+      fetchCategories();
+      fetchSections();
+      fetchDiscounts();
+      fetchShipping();
+      fetchSizes();
   }, []);
 
   const fetchProducts = async () => {
@@ -22,6 +37,72 @@ const ProductPage = () => {
       setLoading(false);
     }
   };
+
+
+
+   const fetchColors = async () => {
+    try {
+      const res = await api.get("/api/color");
+      setColorOption(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchSizes = async () => {
+    try {
+      const res = await api.get("/api/size");
+      setSizeOption(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const res = await api.get("/api/brand");
+      setBrandsOption(res.data);
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get("/api/category");
+      setCategoriesOption(res.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  const fetchSections = async () => {
+    try {
+      const res = await api.get("/api/sections");
+      setSectionsOption(res.data);
+    } catch (error) {
+      console.error("Error fetching sections:", error);
+    }
+  };
+
+  const fetchDiscounts = async () => {
+    try {
+      const res = await api.get("/api/discounts");
+      setDiscountOptions(res.data);
+    } catch (err) {
+      console.error("Error fetching discounts:", err);
+    }
+  };
+
+  const fetchShipping = async () => {
+    try {
+      const res = await api.get("/api/shipping");
+      setShippingOption(res.data);
+    } catch (err) {
+      console.error("Error fetching shipping:", err);
+    }
+  };
+
 
   const handleEdit = (product) => setEditingProduct(product);
   const handleCancel = () => setEditingProduct(null);
@@ -62,7 +143,7 @@ const ProductPage = () => {
   return (
     <div className="p-4 max-w-6xl mx-auto">
       {!editingProduct ? (
-        <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} />
+        <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete}  categoriesOption={categoriesOption}/>
       ) : (
         <div>
           <button
@@ -75,6 +156,13 @@ const ProductPage = () => {
             existingProduct={editingProduct}
             productId={editingProduct.id}
             onSave={handleUpdate}
+            categoriesOption={categoriesOption}
+            colorOption={colorOption}
+            sizeOption ={sizeOption}
+            brandsOption = {brandsOption}
+            sectionsOption = {sectionsOption}
+            discountOptions = {discountOptions}
+            shippingOption = {shippingOption}
           />
         </div>
       )}

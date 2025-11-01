@@ -67,7 +67,7 @@ const reverseStatusMap = {
   4: "out_of_stock",
 };
 
-const EditProduct = ({ existingProduct, onSave,categoriesOption = [],colorOption = [] ,sizeOption = [] ,brandsOption = [] ,sectionsOption = [] ,discountOptions = [] ,shippingOption = []  }) => {
+const EditProduct = ({ existingProduct, onSave }) => {
   const editorRef = useRef(null);
   const [activeTab, setActiveTab] = useState("General");
 
@@ -126,10 +126,10 @@ const EditProduct = ({ existingProduct, onSave,categoriesOption = [],colorOption
       size: mapIdsToOptions(existingProduct.size_id || [], sizeOption),
       categories: mapIdsToOptions(
         existingProduct.categories_id || [],
-        categoriesOption
+        taxOption
       ),
-      brands: mapIdsToOptions(existingProduct.brands_id || [], brandsOption),
-      section: mapIdsToOptions(existingProduct.section_id || [], sectionsOption),
+      brands: mapIdsToOptions(existingProduct.brands_id || [], taxOption),
+      section: mapIdsToOptions(existingProduct.section_id || [], taxOption),
     });
 
     setExistingImages(
@@ -395,32 +395,23 @@ const EditProduct = ({ existingProduct, onSave,categoriesOption = [],colorOption
           )}
           <SelectMulti
             label="Categories"
-            options={categoriesOption}
+            options={taxOption}
             selected={product.categories}
             onChange={(list) => handleMultiSelect("categories", list)}
           />
           <SelectMulti
             label="Brands"
-            options={brandsOption}
+            options={taxOption}
             selected={product.brands}
             onChange={(list) => handleMultiSelect("brands", list)}
           />
           <SelectMulti
             label="Section"
-            options={sectionsOption}
+            options={taxOption}
             selected={product.section}
             onChange={(list) => handleMultiSelect("section", list)}
           />
-          {/* <Select
-            label="Discount"
-            name="discount"
-            value={product.discount}
-            onChange={handleChange}
-            options={discountOptions}
-          /> */}
-
-          {/* ✅ Fixed discount select */}
-          <Selectdiscount
+          <Select
             label="Discount"
             name="discount"
             value={product.discount}
@@ -494,26 +485,6 @@ const Select = ({ label, name, value, onChange, options = [] }) => (
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>
           {opt.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
-
-/* ✅ Discount Select - uses id and name */
-const Selectdiscount = ({ label, name, value, onChange, options = [] }) => (
-  <div className="flex flex-col gap-1">
-    <h3 className="text-sm">{label}</h3>
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      className="w-full border border-gray-300 rounded-md text-sm py-2 px-2 outline-none"
-    >
-      <option value="">Select Discount</option>
-      {options.map((opt) => (
-        <option key={opt.id} value={opt.id}>
-          {opt.name}
         </option>
       ))}
     </select>

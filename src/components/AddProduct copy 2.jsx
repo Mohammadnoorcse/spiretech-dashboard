@@ -170,83 +170,67 @@ const AddProduct = () => {
     }
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const formData = new FormData();
-    const editorData = await editorRef.current?.save();
-    formData.append("description", JSON.stringify(editorData || {}));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      const editorData = await editorRef.current?.save();
+      formData.append("description", JSON.stringify(editorData || {}));
 
-    formData.append("name", product.name);
-    formData.append("short_desc", product.shortDesc);
-    formData.append("regular_price", product.regularPrice);
-    formData.append("sale_price", product.salePrice);
-    formData.append("sku", product.sku);
-    formData.append("stock", product.stock);
-    formData.append("status", product.status);
-    formData.append("currency", product.currency);
+      formData.append("name", product.name);
+      formData.append("short_desc", product.shortDesc);
+      formData.append("regular_price", product.regularPrice);
+      formData.append("sale_price", product.salePrice);
+      formData.append("sku", product.sku);
+      formData.append("stock", product.stock);
+      formData.append("status", product.status);
+      formData.append("currency", product.currency);
 
-    // Send discount as id
-    formData.append("discount_id", product.discount || "");
+      // 👇 FIXED: Properly send discount_id (id from dropdown)
+      formData.append("discount_id", product.discount || "");
 
-    // Send only IDs for multi-select fields
-    const multiSelectFields = [
-      "taxStatus",
-      "shipping",
-      "color",
-      "size",
-      "categories",
-      "brands",
-      "section",
-    ];
+      formData.append("tax_status_id", JSON.stringify(product.taxStatus));
+      formData.append("shipping_id", JSON.stringify(product.shipping));
+      formData.append("color_id", JSON.stringify(product.color));
+      formData.append("size_id", JSON.stringify(product.size));
+      formData.append("categories_id", JSON.stringify(product.categories));
+      formData.append("brands_id", JSON.stringify(product.brands));
+      formData.append("section_id", JSON.stringify(product.section));
 
-    multiSelectFields.forEach((key) => {
-      const list = product[key] || [];
-      const ids = list.map((item) => (item?.id !== undefined ? item.id : item)); 
-      formData.append(key === "taxStatus" ? "tax_status_id"
-        : key === "shipping" ? "shipping_id"
-        : key === "color" ? "color_id"
-        : key === "size" ? "size_id"
-        : key === "categories" ? "categories_id"
-        : key === "brands" ? "brands_id"
-        : "section_id", JSON.stringify(ids));
-    });
+      images.forEach((img) => formData.append("images[]", img.file));
 
-    images.forEach((img) => formData.append("images[]", img.file));
+      const res = await axios.post("http://127.0.0.1:8000/api/products", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    const res = await axios.post("http://127.0.0.1:8000/api/products", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+      alert("✅ Product created successfully!");
+      console.log("Created:", res.data);
 
-    alert("✅ Product created successfully!");
-    console.log("Created:", res.data);
-
-    setProduct({
-      name: "",
-      shortDesc: "",
-      description: "",
-      regularPrice: "",
-      salePrice: "",
-      taxStatus: [],
-      sku: "",
-      stock: "",
-      shipping: [],
-      color: [],
-      size: [],
-      categories: [],
-      brands: [],
-      section: [],
-      discount: "",
-      status: "",
-      currency: "",
-    });
-    setImages([]);
-  } catch (error) {
-    console.error("❌ Error:", error);
-    alert("Failed to create product!");
-  }
-};
-
+      setProduct({
+        name: "",
+        shortDesc: "",
+        description: "",
+        regularPrice: "",
+        salePrice: "",
+        taxStatus: [],
+        sku: "",
+        stock: "",
+        shipping: [],
+        color: [],
+        size: [],
+        categories: [],
+        brands: [],
+        section: [],
+        discount: "",
+        status: "",
+        currency: "",
+      });
+      setImages([]);
+    } catch (error) {
+      console.error("❌ Error:", error);
+      alert("Failed to create product!");
+    }
+  };
 
   const tabs = [
     { name: "General", icon: <LuSettings2 /> },

@@ -23,7 +23,7 @@ const ColorModal = ({ title, initialData, onClose, onSave }) => {
               placeholder={field}
               value={form[field]}
               onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))}
-              className="border border-gray-300 outline-none text-sm text-gray-600 p-2 rounded w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
             />
           ))}
         </div>
@@ -91,16 +91,16 @@ const WebHome = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full">
-          <thead>
-            <tr className="border border-gray-300">
-              <th className="p-2 border text-center">ID</th>
-              <th className="p-2 border text-center">Background</th>
-              <th className="p-2 border text-center">Text</th>
-              <th className="p-2 border text-center">Hover</th>
-              <th className="p-2 border text-center">Active</th>
-              <th className="p-2 border text-center">Border</th>
-              <th className="p-2 border text-center">Actions</th>
+        <table className="min-w-full border border-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">ID</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Background</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Text</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Hover</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Active</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Border</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -108,15 +108,16 @@ const WebHome = () => {
               <tr><td colSpan="7" className="p-4 text-center text-gray-400">No items</td></tr>
             ) : (
               items.map((item) => (
-                <tr key={item.id} className="border border-gray-300">
-                  <td className="p-2 text-center">{item.id}</td>
-                  <td className="p-2 text-center">{item.bgColor}</td>
-                  <td className="p-2 text-center">{item.textColor}</td>
-                  <td className="p-2 text-center">{item.hoverColor}</td>
-                  <td className="p-2 text-center">{item.activeColor}</td>
-                  <td className="p-2 text-center">{item.borderColor}</td>
-                  <td className="p-2 text-center flex justify-center gap-2">
-                    <button
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.id}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.bgColor}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.textColor}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.hoverColor}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.activeColor}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{item.borderColor}</td>
+                  <td className="p-2 border-t border-gray-200 text-center">
+                    <div className="flex justify-center items-center gap-2">
+                      <button
                       onClick={() => { setCurrent(item); setEditOpen(true); }}
                       className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
                     >
@@ -128,6 +129,7 @@ const WebHome = () => {
                     >
                       Delete
                     </button>
+                    </div>
                   </td>
                 </tr>
               ))

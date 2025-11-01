@@ -106,7 +106,7 @@ const DashboardTopPage = () => {
     <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-base font-bold">Dashboard Top Page Management</h1>
+        <h1 className="text-lg font-semibold">Dashboard Top Page Management</h1>
         <button
           onClick={() => handleOpenModal()}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -117,15 +117,15 @@ const DashboardTopPage = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 shadow-sm">
+        <table className="min-w-full border border-gray-200">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-2 border text-center text-sm font-medium">Preview</th>
-              <th className="p-2 border text-center text-sm font-medium">Title</th>
-              <th className="p-2 border text-center text-sm font-medium">Text Color</th>
-              <th className="p-2 border text-center text-sm font-medium">Background</th>
-              <th className="p-2 border text-center text-sm font-medium">Icon BG</th>
-              <th className="p-2 border text-center text-sm font-medium">Action</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Preview</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Title</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Text Color</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Background</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Icon BG</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -147,12 +147,12 @@ const DashboardTopPage = () => {
                       {card.title}
                     </div>
                   </td>
-                  <td className="p-2 border border-gray-300  text-center text-gray-600">{card.title}</td>
-                  <td className="p-2 border border-gray-300  text-center text-gray-600">{card.textColor}</td>
-                  <td className="p-2 border border-gray-300  text-center text-gray-600">{card.bgColor}</td>
-                  <td className="p-2 border border-gray-300  text-center text-gray-600">{card.iconBgColor}</td>
-                  <td className="p-2   flex border-gray-300  justify-center items-center  w-full h-full">
-                    <div className="flex justify-center items-center gap-2 w-full h-full ">
+                  <td className="p-2 text-sm text-center border border-gray-200">{card.title}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{card.textColor}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{card.bgColor}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{card.iconBgColor}</td>
+                  <td className="p-2 border-t border-gray-200 text-center">
+                    <div className="flex justify-center items-center gap-2 ">
                       <button
                       onClick={() => handleOpenModal(card)}
                       className="px-3 py-1 text-sm bg-yellow-500 text-white rounded-md hover:bg-yellow-600"

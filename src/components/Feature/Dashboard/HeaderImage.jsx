@@ -25,9 +25,9 @@ const HeaderImageModal = ({ title, initialData = {}, onClose, onSave }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-bold mb-4">{title}</h3>
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
         <div className="flex flex-col gap-3">
-          <input type="file" accept="image/*" onChange={handleFileChange} className="border p-2 rounded w-full" />
+          <input type="file" accept="image/*" onChange={handleFileChange} className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full" />
           {form.image && (
             <div className="flex gap-3 items-center">
               <img src={form.image} alt="preview" className="w-28 h-20 object-cover rounded border" />
@@ -43,14 +43,14 @@ const HeaderImageModal = ({ title, initialData = {}, onClose, onSave }) => {
               placeholder="Width"
               value={form.width}
               onChange={(e) => setForm((p) => ({ ...p, width: e.target.value }))}
-              className="border p-2 rounded"
+              className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
             />
             <input
               type="number"
               placeholder="Height"
               value={form.height}
               onChange={(e) => setForm((p) => ({ ...p, height: e.target.value }))}
-              className="border p-2 rounded"
+              className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
             />
           </div>
         </div>
@@ -140,22 +140,22 @@ const HeaderImage = () => {
   return (
     <div className="w-full p-4">
       <div className="flex justify-between mb-4">
-        <h1 className="text-lg font-bold">Header Images</h1>
+        <h1 className="text-lg font-semibold">Header Images</h1>
         <button onClick={() => setCreateOpen(true)} className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600">
           Create
         </button>
       </div>
 
-      <div className="overflow-x-auto bg-white border border-gray-300">
-        <table className="min-w-full text-sm">
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-200">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Preview</th>
-              <th className="p-2 border">Filename</th>
-              <th className="p-2 border">Width</th>
-              <th className="p-2 border">Height</th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">ID</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Preview</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Filename</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Width</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Height</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -167,22 +167,34 @@ const HeaderImage = () => {
               </tr>
             ) : (
               items.map((it) => (
-                <tr key={it.id} className="hover:bg-gray-50">
-                  <td className="p-2 border border-gray-300  text-center">{it.id}</td>
-                  <td className="p-2 border border-gray-300  text-center">
+                <tr key={it.id} className="hover:bg-gray-50 ">
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.id}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">
                     {it.image_path ? (
                       <img src={`${import.meta.env.VITE_API_BASE_URL}storage/${it.image_path}`}  alt={it.filename} className="w-40 h-16 object-cover rounded mx-auto" />
                     ) : (
                       <div className="w-40 h-16 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500 mx-auto">No preview</div>
                     )}
                   </td>
-                  <td className="p-2 border border-gray-300 text-center">{it.filename}</td>
-                  <td className="p-2 border border-gray-300 text-center">{it.width}</td>
-                  <td className="p-2 border border-gray-300 text-center">{it.height}</td>
-                  <td className="p-2 w-full h-full border-t border-gray-300  text-center flex justify-center items-center gap-2">
-                    <button onClick={() => { setCurrent(it); setEditOpen(true); }} className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 text-xs">Edit</button>
-                    <button onClick={() => handleDelete(it.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs">Delete</button>
-                  </td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.filename}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.width}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.height}</td>
+                 <td className="p-2 border-t border-gray-200 text-center">
+                  <div className="flex justify-center items-center gap-2">
+                    <button
+                      onClick={() => { setCurrent(it); setEditOpen(true); }}
+                      className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 text-xs"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(it.id)}
+                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
                 </tr>
               ))
             )}

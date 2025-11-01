@@ -36,27 +36,26 @@ const SliderModal = ({ isOpen, onClose, onSave, initialData }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-96">
-        <h2 className="text-xl font-semibold mb-4">Slider Form</h2>
+        <h2 className="text-xl font-semibold mb-4">Slider Image</h2>
         <div className="mb-4">
-          <label className="text-sm block mb-1">Upload Image</label>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="border border-gray-300 p-2 text-sm rounded w-full"
+            className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
           />
 
           {form.image && (
             <div className="flex items-center gap-3 mt-2">
               <img
-              src={
-                form.image instanceof File
-                  ? URL.createObjectURL(form.image) 
-                  : `${import.meta.env.VITE_API_BASE_URL}/${form.image}` 
-              }
-              alt="preview"
-              className="w-24 h-20 object-cover rounded border"
-            />
+                src={
+                  form.image instanceof File
+                    ? URL.createObjectURL(form.image)
+                    : `${import.meta.env.VITE_API_BASE_URL}/${form.image}`
+                }
+                alt="preview"
+                className="w-24 h-20 object-cover rounded border"
+              />
               <div>
                 <p className="text-sm font-medium">Preview</p>
                 <p className="text-xs text-gray-500">
@@ -69,12 +68,11 @@ const SliderModal = ({ isOpen, onClose, onSave, initialData }) => {
           )}
         </div>
         <div className="mb-4">
-          <label className="block mb-1">Status</label>
           <select
             name="status"
             value={form.status}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -157,54 +155,70 @@ const SliderPage = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Sliders</h1>
+        <h1 className="text-lg font-semibold">Sliders</h1>
         <button
           onClick={handleCreate}
           className="px-4 py-2 bg-green-500 text-white rounded"
         >
-          Create Slider
+          Create
         </button>
       </div>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">S/N</th>
-            <th className="border p-2">Image</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sliders.map((slider, index) => (
-            <tr key={slider.id}>
-              <td className="border p-2 text-center">{index + 1}</td>
-              <td className="border p-2 text-center">
-                <img
-                  src={`${import.meta.env.VITE_API_BASE_URL}/${slider.image}`}
-                  alt="slider"
-                  className="w-20 h-12 object-cover mx-auto"
-                />
-              </td>
-              <td className="border p-2 text-center">{slider.status}</td>
-              <td className="border p-2 text-center flex justify-center gap-2">
-                <button
-                  onClick={() => handleEdit(slider)}
-                  className="px-2 py-1 bg-blue-500 text-white rounded"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(slider.id)}
-                  className="px-2 py-1 bg-red-500 text-white rounded"
-                >
-                  Delete
-                </button>
-              </td>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">
+                S/N
+              </th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">
+                Image
+              </th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">
+                Status
+              </th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">
+                Action
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sliders.map((slider, index) => (
+              <tr key={slider.id}>
+                <td className="p-2 text-sm text-center border border-gray-200">
+                  {index + 1}
+                </td>
+                <td className="p-2 text-sm text-center border border-gray-200">
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/${slider.image}`}
+                    alt="slider"
+                    className="w-20 h-12 object-cover mx-auto"
+                  />
+                </td>
+                <td className="p-2 text-sm text-center border border-gray-200">
+                  {slider.status}
+                </td>
+                <td className="p-2 border-t border-gray-200 text-center">
+                  <div className="flex justify-center items-center gap-2">
+                    <button
+                      onClick={() => handleEdit(slider)}
+                      className="px-2 py-1 bg-blue-500 text-white rounded"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(slider.id)}
+                      className="px-2 py-1 bg-red-500 text-white rounded"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <SliderModal
         isOpen={isModalOpen}

@@ -1,24 +1,42 @@
 import React, { useMemo, useState } from "react";
 
-const ProductList = ({ products, onEdit, onDelete }) => {
+const ProductList = ({ products, categoriesOption = [], onEdit, onDelete }) => {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(5);
   const [sortBy, setSortBy] = useState("name");
   const [sortDir, setSortDir] = useState("asc");
 
+  // ✅ Helper: Get category name(s)
+  const getCategoryName = (p) => {
+    try {
+      const parsed = JSON.parse(p.categories_id);
+
+      // Case 1: Array of objects
+      if (Array.isArray(parsed) && parsed.length && typeof parsed[0] === "object") {
+        return parsed.map((c) => c.name).join(", ");
+      }
+
+      // Case 2: Array of IDs (like [1,2])
+      if (Array.isArray(parsed) && parsed.length && typeof parsed[0] === "number") {
+        const matched = parsed
+          .map((id) => categoriesOption.find((c) => c.id === id)?.name)
+          .filter(Boolean);
+        return matched.length ? matched.join(", ") : "—";
+      }
+
+      return "—";
+    } catch {
+      return "—";
+    }
+  };
+
   // ✅ Filtering + Sorting
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     let arr = products.filter((p) => {
-      const categoryName = (() => {
-        try {
-          const parsed = JSON.parse(p.categories_id);
-          return parsed?.[0]?.name?.toLowerCase() || "";
-        } catch {
-          return "";
-        }
-      })();
+      const categoryName = getCategoryName(p).toLowerCase();
 
       return (
         p.name.toLowerCase().includes(q) ||
@@ -38,7 +56,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
     });
 
     return arr;
-  }, [query, sortBy, sortDir, products]);
+  }, [query, sortBy, sortDir, products, categoriesOption]);
 
   // ✅ Pagination
   const total = filtered.length;
@@ -46,24 +64,12 @@ const ProductList = ({ products, onEdit, onDelete }) => {
   const start = (page - 1) * perPage;
   const pageItems = filtered.slice(start, start + perPage);
 
-  function toggleSort(field) {
+  const toggleSort = (field) => {
     if (sortBy === field) {
       setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
     } else {
       setSortBy(field);
       setSortDir("asc");
-    }
-  }
-
-
-
-
-  const getCategoryName = (p) => {
-    try {
-      const parsed = JSON.parse(p.categories_id);
-      return parsed?.[0]?.name || "—";
-    } catch {
-      return "—";
     }
   };
 
@@ -102,11 +108,9 @@ const ProductList = ({ products, onEdit, onDelete }) => {
               <th className="p-3 cursor-pointer" onClick={() => toggleSort("sku")}>
                 SKU {sortBy === "sku" ? (sortDir === "asc" ? "▲" : "▼") : ""}
               </th>
-              <th className="p-3 cursor-pointer" onClick={() => toggleSort("category")}>
-                Category
-              </th>
+              <th className="p-3">Category</th>
               <th className="p-3 cursor-pointer" onClick={() => toggleSort("stock")}>
-                Stock
+                Stock {sortBy === "stock" ? (sortDir === "asc" ? "▲" : "▼") : ""}
               </th>
               <th className="p-3 text-right">Actions</th>
             </tr>
@@ -119,7 +123,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
                     <img
                       src={
                         p.images && p.images.length > 0
-                          ? `${import.meta.env.VITE_API_BASE_URL}storage/${p.images[1]}`
+                          ? `${import.meta.env.VITE_API_BASE_URL}storage/${p.images[0]}`
                           : "/placeholder.jpg"
                       }
                       alt={p.name}

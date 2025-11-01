@@ -37,12 +37,12 @@ const FooterImageModal = ({ title, initialData, onClose, onSave }) => {
 
         <div className="space-y-3">
           <div>
-            <label className="text-sm block mb-1">Upload Image</label>
+            
             <input
               type="file"
               accept="image/*"
               onChange={handleFile}
-              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
             />
           </div>
 
@@ -66,31 +66,33 @@ const FooterImageModal = ({ title, initialData, onClose, onSave }) => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm block mb-1">Width (px)</label>
+              
               <input
                 type="number"
+                placeholder="Width"
                 value={form.width}
                 onChange={(e) => setForm({ ...form, width: e.target.value })}
-                className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
+                className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
               />
             </div>
             <div>
-              <label className="text-sm block mb-1">Height (px)</label>
+              
               <input
                 type="number"
+                placeholder="Height"
                 value={form.height}
                 onChange={(e) => setForm({ ...form, height: e.target.value })}
-                className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
+                className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-sm block mb-1">Status</label>
+            
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="border border-gray-300 outline-none text-sm text-gray-400 p-2 rounded w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -173,7 +175,7 @@ const FooterImage = () => {
   return (
     <div className="w-full p-4">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-base font-bold">Footer Images</h1>
+        <h1 className="text-lg font-semibold">Footer Images</h1>
         <button
           onClick={() => setCreateOpen(true)}
           className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600"
@@ -182,17 +184,17 @@ const FooterImage = () => {
         </button>
       </div>
 
-      <div className="overflow-x-auto bg-white border border-gray-300">
-        <table className="min-w-full text-sm">
+      <div className="overflow-x-auto ">
+        <table className="min-w-full border border-gray-200">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Preview</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">ID</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Preview</th>
               
-              <th className="p-2 border">Width</th>
-              <th className="p-2 border">Height</th>
-              <th className="p-2 border">Status</th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Width</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Height</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Status</th>
+              <th className="p-2 border border-gray-200 text-center text-sm font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -204,9 +206,9 @@ const FooterImage = () => {
               </tr>
             ) : (
               items.map((it) => (
-                <tr key={it.id}>
-                  <td className="border p-2 text-center">{it.id}</td>
-                  <td className="border p-2 text-center">
+                <tr key={it.id}  className="hover:bg-gray-50 ">
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.id}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">
                     <img
                       
                       src={`${import.meta.env.VITE_API_BASE_URL}storage/${it.image}`}
@@ -215,9 +217,9 @@ const FooterImage = () => {
                     />
                   </td>
                   
-                  <td className="border p-2 text-center">{it.width}</td>
-                  <td className="border p-2 text-center">{it.height}</td>
-                  <td className="border p-2 text-center">
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.width}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.height}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">
                     <span
                       className={`px-2 py-1 rounded text-xs font-medium ${
                         it.status === "active"
@@ -228,8 +230,8 @@ const FooterImage = () => {
                       {it.status}
                     </span>
                   </td>
-                  <td className="border p-2 text-center">
-                    <div className="flex justify-center gap-2">
+                  <td className="p-2 border-t border-gray-200 text-center">
+                    <div className="flex justify-center items-center gap-2">
                       <button
                         onClick={() => {
                           setCurrent(it);

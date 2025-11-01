@@ -30,12 +30,12 @@ const HeaderImageModal = ({ title, initialData, onClose, onSave }) => {
         {/* Upload Input */}
         <div className="space-y-3">
           <div>
-            <label className="text-sm block mb-1">Upload Image</label>
+           
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="border border-gray-300 p-2 text-sm rounded w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
             />
           </div>
 
@@ -56,26 +56,26 @@ const HeaderImageModal = ({ title, initialData, onClose, onSave }) => {
           {/* Width & Height */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm block mb-1">Width (px)</label>
+            
               <input
                 type="number"
                 value={form.width}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, width: e.target.value }))
                 }
-                className="border border-gray-300 p-2 text-sm rounded w-full"
+                className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
                 placeholder="e.g. 1200"
               />
             </div>
             <div>
-              <label className="text-sm block mb-1">Height (px)</label>
+              
               <input
                 type="number"
                 value={form.height}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, height: e.target.value }))
                 }
-                className="border border-gray-300 p-2 text-sm rounded w-full"
+                className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
                 placeholder="e.g. 400"
               />
             </div>
@@ -89,7 +89,7 @@ const HeaderImageModal = ({ title, initialData, onClose, onSave }) => {
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, status: e.target.value }))
               }
-              className="border border-gray-300 p-2 text-sm rounded w-full"
+              className="border border-gray-300 outline-none text-sm text-gray-700 p-2 rounded w-full"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -201,20 +201,20 @@ const HeaderImage = () => {
           }}
           className="px-4 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600"
         >
-          + Create
+          Create
         </button>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white border border-gray-300">
-        <table className="min-w-full text-sm">
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-200">
           <thead className="bg-gray-100">
             <tr>
               {["ID", "Preview", "Width", "Height", "Status", "Actions"].map(
                 (h) => (
                   <th
                     key={h}
-                    className="p-2 border border-gray-300 text-center font-medium"
+                    className="p-2 border border-gray-200 text-center text-sm font-medium"
                   >
                     {h}
                   </th>
@@ -231,9 +231,9 @@ const HeaderImage = () => {
               </tr>
             ) : (
               items.map((it) => (
-                <tr key={it.id} className="hover:bg-gray-50 transition">
-                  <td className="p-2 border text-center">{it.id}</td>
-                  <td className="p-2 border text-center">
+                <tr key={it.id} className="hover:bg-gray-50">
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.id}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">
                     {it.image ? (
                       <img
                       src={`${import.meta.env.VITE_API_BASE_URL}/${it.image}`}
@@ -247,9 +247,9 @@ const HeaderImage = () => {
                       </div>
                     )}
                   </td>
-                  <td className="p-2 border text-center">{it.width}</td>
-                  <td className="p-2 border text-center">{it.height}</td>
-                  <td className="p-2 border text-center">
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.width}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">{it.height}</td>
+                  <td className="p-2 text-sm text-center border border-gray-200">
                     <span
                       className={`px-2 py-1 rounded text-xs font-medium ${
                         it.status === "active"
@@ -260,8 +260,8 @@ const HeaderImage = () => {
                       {it.status}
                     </span>
                   </td>
-                  <td className="p-2 border text-center">
-                    <div className="flex justify-center gap-2">
+                  <td className="p-2 border-t border-gray-200 text-center">
+                    <div className="flex justify-center items-center gap-2">
                       <button
                         onClick={() => setEditItem(it)}
                         className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 text-xs"
